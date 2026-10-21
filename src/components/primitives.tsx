@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useId, useRef, useState, type MouseEvent, type ReactNode } from 'react';
 import { motion, useInView, useMotionValue, animate } from 'motion/react';
-import { usePrefersReducedMotion } from '../hooks/useSiteState';
-import { refMap, type RefKey } from '../data/research';
+import { usePrefersReducedMotion, useSite } from '../hooks/useSiteState';
+import { refMap, SECTIONS, type RefKey } from '../data/research';
 
 /**
  * Scroll-triggered entrance. Collapses to a plain element when motion is reduced.
@@ -49,8 +49,56 @@ export function Counter({ to, decimals = 0, suffix = '', prefix = '', immediate 
   return <span ref={ref} className="tabular-nums">{prefix}{shown.toFixed(decimals)}{suffix}</span>;
 }
 
-/* A citation that links to its reference entry on this page. */
+const REFERENCES_INDEX = SECTIONS.findIndex(s => s.id === 'references');
+
+/**
+ * Scrolls to a reference entry once it is actually in the document.
+ *
+ * Presentation Mode mounts only the active section, and AnimatePresence runs in
+ * `mode="wait"`, so section L does not exist for several frames after it is
+ * selected. A single requestAnimationFrame lands too early and the jump is lost,
+ * which is why this polls for the element instead of assuming it is there.
+ */
+function revealReference(key: RefKey, smooth: boolean) {
+  let tries = 48; // ~0.8s at 60fps; the exit transition is 0.14s
+  const tick = () => {
+    const el = document.getElementById(`ref-${key}`);
+    if (el) {
+      el.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'start' });
+      /* Move focus with the eye, so a keyboard reader lands on the entry rather
+         than keeping focus on a citation that is now off screen. */
+      el.focus({ preventScroll: true });
+      return;
+    }
+    if (tries-- > 0) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+
+/**
+ * A citation that resolves to its reference entry in section L.
+ *
+ * Explore Mode renders every section, so the plain fragment link is left to do
+ * its own work: the URL updates and Back behaves as a reader expects.
+ * Presentation Mode has to activate section L first, so there the anchor is
+ * intercepted. It stays an anchor with a real href either way, which is what
+ * keeps it focusable, Enter-activatable and open-in-new-tab friendly.
+ */
 export function Cite({ keys }: { keys: RefKey[] }) {
+  const { mode, go } = useSite();
+  const reduced = usePrefersReducedMotion();
+
+  const jump = useCallback((e: MouseEvent<HTMLAnchorElement>, k: RefKey) => {
+    if (mode !== 'presentation') return;      // native anchor is correct here
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+    e.preventDefault();
+    go(REFERENCES_INDEX);
+    /* replaceState rather than pushState: the slide change is the navigation, and
+       a pushed hash would leave a Back step that cannot restore the slide. */
+    history.replaceState(null, '', `#ref-${k}`);
+    revealReference(k, !reduced);
+  }, [mode, go, reduced]);
+
   return (
     <span className="cite">
       {keys.map((k, i) => {
@@ -60,7 +108,11 @@ export function Cite({ keys }: { keys: RefKey[] }) {
         return (
           <span key={k}>
             {i > 0 && '; '}
-            <a href={`#ref-${k}`} className="hover:text-cyan-300 underline decoration-dotted decoration-line/60 underline-offset-2">
+            <a
+              href={`#ref-${k}`}
+              onClick={e => jump(e, k)}
+              className="hover:text-cyan-300 underline decoration-dotted decoration-line/60 underline-offset-2"
+            >
               {name}, {y}
             </a>
           </span>
@@ -100,6 +152,46 @@ export function Chip({ children, tone = 'neutral' }:
     rose: 'border-rose/40 text-rose bg-rose/[0.07]',
   };
   return <span className={`chip ${tones[tone]}`}>{children}</span>;
+}
+
+/**
+ * A folded block, used in section F where the proposal runs long enough that
+ * presenting it as a single slide means scrolling past the argument to reach the
+ * supporting detail.
+ *
+ * Nothing is removed and nothing moves section: the content stays where it was
+ * and starts folded. The panel element is always rendered so `aria-controls`
+ * always resolves, and the `hidden` attribute is what takes it out of the
+ * accessibility tree when closed.
+ */
+export function Disclosure({ summary, hint, children, defaultOpen = false }:
+  { summary: string; hint?: string; children: ReactNode; defaultOpen?: boolean }) {
+  const [open, setOpen] = useState(defaultOpen);
+  const panelId = useId();
+  return (
+    <div className={`mt-6 card ${open ? 'border-cyan-500/30' : ''}`}>
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        aria-expanded={open}
+        aria-controls={panelId}
+        className="w-full text-left px-6 py-5 flex items-center gap-4"
+      >
+        <span aria-hidden
+          className={`shrink-0 text-lg leading-none text-cyan-300 transition-transform ${open ? 'rotate-45' : ''}`}>+</span>
+        <span className="min-w-0 flex-1">
+          <span className="block font-display text-[0.98rem] font-bold leading-snug text-sand">{summary}</span>
+          {hint && <span className="mt-0.5 block text-[0.8rem] leading-snug text-mute">{hint}</span>}
+        </span>
+        <span className="shrink-0 font-display text-[0.66rem] font-semibold uppercase tracking-[0.13em] text-mute">
+          {open ? 'Hide' : 'Show'}
+        </span>
+      </button>
+      <div id={panelId} hidden={!open} className="border-t border-line/60 px-6 pb-6 pt-2">
+        {children}
+      </div>
+    </div>
+  );
 }
 
 /* Used wherever the site must say plainly that something is proposed, not measured. */

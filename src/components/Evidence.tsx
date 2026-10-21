@@ -88,7 +88,10 @@ export function EvidenceCards({ section, title = 'Check the evidence' }:
         Open a card to see what the source actually reports, the area it covers and a direct link.
         The full APA reference list is in section L.
       </p>
-      <div className="mt-5 grid md:grid-cols-2 gap-3">
+      {/* Sections D and E carry a single card each. A one-item two-column grid
+          leaves a conspicuous empty half, so the grid only splits when there is
+          something to put in the second column. */}
+      <div className={`mt-5 grid gap-3 ${items.length > 1 ? 'md:grid-cols-2' : ''}`}>
         {items.map(e => <Card key={e.id} e={e} />)}
       </div>
     </div>
@@ -104,15 +107,19 @@ export function EvidenceCards({ section, title = 'Check the evidence' }:
  * readable at 390px, be reachable by keyboard, and make sense with no animation
  * at all. A node-and-edge diagram satisfies none of those on a phone.
  */
-export function ImplementationMap() {
+export function ImplementationMap({ heading = true }: { heading?: boolean } = {}) {
   const [active, setActive] = useState<string | null>('employer');
   const reduced = usePrefersReducedMotion();
   const actor = IMPL_ACTORS.find(a => a.id === active) ?? null;
 
   return (
-    <div className="mt-12">
-      <div className="eyebrow">Who would do what</div>
-      <h3 className="t-sub mt-3">Responsibilities across the three stages</h3>
+    /* `heading` is dropped when a Disclosure wraps this and already names it, so
+       the title is not announced twice. The content itself is unchanged. */
+    <div className={heading ? 'mt-12' : ''}>
+      {heading && <>
+        <div className="eyebrow">Who would do what</div>
+        <h3 className="t-sub mt-3">Responsibilities across the three stages</h3>
+      </>}
       <p className="t-micro mt-2 max-w-reading">
         Select an organisation to see what it already does by law, and what this proposal
         would additionally ask of it. The two are kept apart on purpose.
@@ -123,7 +130,7 @@ export function ImplementationMap() {
         {IMPL_STAGES.map((st, si) => (
           <div key={st.key} className="card p-5">
             <div className="flex items-baseline gap-2">
-              <span className="font-display text-[1.1rem] font-extrabold text-cyan-300/40">{si + 1}</span>
+              <span className="font-display text-[1.1rem] font-extrabold text-cyan-300/55">{si + 1}</span>
               <span className="font-display text-[0.95rem] font-bold text-sand">{st.label}</span>
             </div>
             <p className="mt-1.5 text-[0.78rem] leading-snug text-mute">{st.note}</p>

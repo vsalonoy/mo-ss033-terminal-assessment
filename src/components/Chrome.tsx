@@ -12,7 +12,18 @@ export function TopBar() {
   return (
     <div className="fixed top-0 inset-x-0 z-40 border-b border-line bg-ink-900/85 backdrop-blur-md">
       <div className="wrap flex items-center gap-3 sm:gap-4 h-14">
-        <a href="#top" className="min-w-0 font-display text-[0.88rem] sm:text-[0.95rem] font-bold text-sand truncate hover:text-cyan-300">
+        {/* "#top" is the hero, which only Explore Mode renders. In Presentation
+            Mode the wordmark returns to the first slide instead of doing nothing. */}
+        <a
+          href="#top"
+          onClick={e => {
+            if (mode !== 'presentation') return;
+            if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+            e.preventDefault();
+            go(0);
+          }}
+          className="min-w-0 font-display text-[0.88rem] sm:text-[0.95rem] font-bold text-sand truncate hover:text-cyan-300"
+        >
           Automation <span className="text-mute">and Filipino workers</span>
         </a>
 

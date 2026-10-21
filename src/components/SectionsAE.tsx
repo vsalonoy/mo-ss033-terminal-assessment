@@ -398,8 +398,10 @@ export function Solutions() {
                     const dim = focusKey !== null && focusKey !== c.key;
                     return (
                       <th key={c.key} scope="col"
+                        /* The de-emphasised column still has to clear WCAG AA. text-mute/45
+                           measured 2.45:1 against the card; /75 measures 4.64:1. */
                         className={`px-5 py-3.5 font-display text-[0.66rem] font-semibold uppercase tracking-[0.13em] transition-colors ${
-                          focusKey === c.key ? 'text-cyan-200' : dim ? 'text-mute/45' : 'text-mute'}`}>
+                          focusKey === c.key ? 'text-cyan-200' : dim ? 'text-mute/75' : 'text-mute'}`}>
                         {c.label}
                       </th>
                     );
@@ -427,9 +429,16 @@ export function Solutions() {
                             onClick={() => setCellOn(on ? null : id)}
                             aria-expanded={on}
                             aria-label={`${s.short}, ${c.label}: ${s.criteria[c.key].r}. Show reasoning`}
-                            className={`text-left transition-opacity duration-300 ${dim ? 'opacity-40' : 'opacity-100'}`}
+                            /* De-emphasis is carried by dropping the rating colour, not by
+                               fading the text out. opacity-40 put the rose tone at 1.96:1
+                               against the card; a neutral chip at opacity-75 measures
+                               4.64:1. The rating is always spelled out in words, so losing
+                               the colour loses no information. */
+                            className={`text-left transition-opacity duration-300 ${dim ? 'opacity-75' : 'opacity-100'}`}
                           >
-                            <Chip tone={ratingTone(s.criteria[c.key].r)}>{s.criteria[c.key].r}</Chip>
+                            <Chip tone={dim ? 'neutral' : ratingTone(s.criteria[c.key].r)}>
+                              {s.criteria[c.key].r}
+                            </Chip>
                           </button>
                         </td>
                       );

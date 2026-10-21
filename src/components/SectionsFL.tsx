@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'motion/react';
-import { Section, Reveal, Cite, Chip, Caveat } from './primitives';
+import { Section, Reveal, Cite, Chip, Caveat, Disclosure } from './primitives';
 import { StepRates } from './viz';
 import { EvidenceCards, ImplementationMap } from './Evidence';
 import { usePrefersReducedMotion } from '../hooks/useSiteState';
@@ -23,7 +23,7 @@ export function Proposal() {
         {PROPOSAL.mechanism.map((m, i) => (
           <Reveal key={m.n} delay={i * 0.08}>
             <div className="card p-6 h-full">
-              <div className="font-display text-[1.9rem] font-extrabold leading-none text-cyan-300/35">{m.n}</div>
+              <div className="font-display text-[1.9rem] font-extrabold leading-none text-cyan-300/55">{m.n}</div>
               <h3 className="mt-3 text-[1.02rem] text-sand">{m.t}</h3>
               <p className="mt-2 text-[0.88rem] leading-relaxed text-mute">{m.d}</p>
             </div>
@@ -108,66 +108,83 @@ export function Proposal() {
         </div>
       </Reveal>
 
-      {/* requirements, benefits, dependencies */}
-      <Reveal>
-        <div className="mt-14 grid md:grid-cols-3 gap-5">
-          {([
-            ['Resources needed', PROPOSAL.resources, 'neutral'],
-            ['Financial requirements', PROPOSAL.financial, 'neutral'],
-            ['What it depends on', PROPOSAL.depends, 'amber'],
-          ] as const).map(([t, items, tone]) => (
-            <div key={t} className="card p-6">
-              <div className="eyebrow">{t}</div>
-              <ul className="mt-3 space-y-2.5">
-                {items.map((x, i) => (
-                  <li key={i} className="flex gap-3 text-[0.87rem] leading-relaxed text-sand/88">
-                    <span className={tone === 'amber' ? 'text-amber shrink-0' : 'text-cyan-300/60 shrink-0'} aria-hidden>&middot;</span>{x}
-                  </li>
+      {/*
+        Everything above stays open: the claim, the mechanism, what is and is not
+        already here, and how the design would work. That is the argument.
+
+        The three blocks below are the supporting detail. They are folded rather
+        than cut, because section F ran to roughly twice the length of any other
+        section, which made it the one slide a presenter had to scroll through to
+        reach the end of. Nothing has been removed and nothing has changed section.
+        Reveal is deliberately not used inside them: a scroll-triggered entrance
+        cannot fire reliably on content that was display:none a moment earlier.
+      */}
+      <div className="mt-14">
+        <Disclosure
+          summary="Resources, funding and what it depends on"
+          hint="What the track would need to run, and the assumptions it rests on">
+          <div className="grid md:grid-cols-3 gap-5">
+            {([
+              ['Resources needed', PROPOSAL.resources, 'neutral'],
+              ['Financial requirements', PROPOSAL.financial, 'neutral'],
+              ['What it depends on', PROPOSAL.depends, 'amber'],
+            ] as const).map(([t, items, tone]) => (
+              <div key={t}>
+                <div className="eyebrow">{t}</div>
+                <ul className="mt-3 space-y-2.5">
+                  {items.map((x, i) => (
+                    <li key={i} className="flex gap-3 text-[0.87rem] leading-relaxed text-sand/88">
+                      <span className={tone === 'amber' ? 'text-amber shrink-0' : 'text-cyan-300/60 shrink-0'} aria-hidden>&middot;</span>{x}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+          <div className="mt-8 border-t border-line pt-6">
+            <div className="eyebrow">Expected benefits</div>
+            <ul className="mt-3 grid sm:grid-cols-3 gap-5">
+              {PROPOSAL.benefits.map((b, i) => (
+                <li key={i} className="text-[0.89rem] leading-relaxed text-sand/90">{b}</li>
+              ))}
+            </ul>
+          </div>
+        </Disclosure>
+
+        {/* verified vs proposed, the §9 requirement */}
+        <Disclosure
+          summary="What is verified against what I am proposing"
+          hint="The line between evidence I checked and design decisions that are mine">
+          <div className="grid md:grid-cols-2 gap-5">
+            <div className="card p-6 border-cyan-500/30">
+              <div className="flex items-center gap-3">
+                <Chip tone="cyan">Verified evidence</Chip>
+              </div>
+              <ul className="mt-4 space-y-2.5">
+                {PROPOSAL.verified.map((x, i) => (
+                  <li key={i} className="text-[0.87rem] leading-relaxed text-sand/88">{x}</li>
                 ))}
               </ul>
             </div>
-          ))}
-        </div>
-      </Reveal>
-
-      <Reveal>
-        <div className="mt-6 card p-6">
-          <div className="eyebrow">Expected benefits</div>
-          <ul className="mt-3 grid sm:grid-cols-3 gap-5">
-            {PROPOSAL.benefits.map((b, i) => (
-              <li key={i} className="text-[0.89rem] leading-relaxed text-sand/90">{b}</li>
-            ))}
-          </ul>
-        </div>
-      </Reveal>
-
-      {/* verified vs proposed, the §9 requirement */}
-      <Reveal>
-        <div className="mt-10 grid md:grid-cols-2 gap-5">
-          <div className="card p-6 border-cyan-500/30">
-            <div className="flex items-center gap-3">
-              <Chip tone="cyan">Verified evidence</Chip>
+            <div className="card p-6 border-amber/30">
+              <div className="flex items-center gap-3">
+                <Chip tone="amber">Proposed by me, not established</Chip>
+              </div>
+              <ul className="mt-4 space-y-2.5">
+                {PROPOSAL.proposed.map((x, i) => (
+                  <li key={i} className="text-[0.87rem] leading-relaxed text-sand/88">{x}</li>
+                ))}
+              </ul>
             </div>
-            <ul className="mt-4 space-y-2.5">
-              {PROPOSAL.verified.map((x, i) => (
-                <li key={i} className="text-[0.87rem] leading-relaxed text-sand/88">{x}</li>
-              ))}
-            </ul>
           </div>
-          <div className="card p-6 border-amber/30">
-            <div className="flex items-center gap-3">
-              <Chip tone="amber">Proposed by me, not established</Chip>
-            </div>
-            <ul className="mt-4 space-y-2.5">
-              {PROPOSAL.proposed.map((x, i) => (
-                <li key={i} className="text-[0.87rem] leading-relaxed text-sand/88">{x}</li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </Reveal>
+        </Disclosure>
 
-      <Reveal><ImplementationMap /></Reveal>
+        <Disclosure
+          summary="Who would do what across the three stages"
+          hint="Each organisation's existing statutory duty, against what this proposal would ask of it">
+          <ImplementationMap heading={false} />
+        </Disclosure>
+      </div>
 
       <EvidenceCards section="proposal" />
     </Section>
@@ -178,6 +195,28 @@ export function Proposal() {
 export function Journey() {
   const reduced = usePrefersReducedMotion();
   const [step, setStep] = useState(0);
+  /**
+   * Which of the five named stages is selected, tracked separately from the step.
+   *
+   * "Employer participation" and "Placement" are both carried by journey step 3,
+   * so a selection derived from the step number alone marked both cards active at
+   * once. The stage is the thing the reader clicked, so it is the thing stored.
+   * Null is correct for steps 1 and 5, which are not among the five named stages.
+   */
+  const [stage, setStage] = useState<string | null>(null);
+
+  /* Picking a stage card: remember the stage, move the step to match. */
+  const pickStage = (st: { stage: string; step: number }) => {
+    setStage(st.stage);
+    setStep(JOURNEY.findIndex(j => j.step === st.step));
+  };
+
+  /* Picking a step from the rail or the dots: move the step, and resolve the stage
+     to the first one that step carries, so exactly one card is ever marked active. */
+  const pickStep = (i: number) => {
+    setStep(i);
+    setStage(JOURNEY_STAGES.find(x => x.step === JOURNEY[i].step)?.stage ?? null);
+  };
 
   return (
     <Section id="journey" letter="G" label="A worker journey"
@@ -192,12 +231,12 @@ export function Journey() {
           <div className="eyebrow">The five stages, and where each one sits</div>
           <ol className="mt-5 grid sm:grid-cols-3 lg:grid-cols-5 gap-3">
             {JOURNEY_STAGES.map(st => {
-              const on = JOURNEY[step].step === st.step;
+              const on = stage === st.stage;
               return (
                 <li key={st.stage}>
                   <button
                     type="button"
-                    onClick={() => setStep(JOURNEY.findIndex(j => j.step === st.step))}
+                    onClick={() => pickStage(st)}
                     aria-pressed={on}
                     className={`w-full h-full text-left card px-4 py-3.5 transition-colors ${
                       on ? 'border-cyan-500/50 bg-cyan-500/[0.07]' : 'hover:border-line/80'}`}
@@ -236,7 +275,7 @@ export function Journey() {
               return (
                 <li key={j.step}>
                   <button
-                    onClick={() => setStep(i)} aria-current={i === step ? 'step' : undefined}
+                    onClick={() => pickStep(i)} aria-current={i === step ? 'step' : undefined}
                     className={`w-full text-left pl-4 pr-4 py-3.5 rounded-lg flex gap-3.5 items-start transition-colors ${
                       i === step ? 'bg-cyan-500/[0.08] border border-cyan-500/30' : 'border border-transparent hover:bg-ink-600/50'}`}
                   >
@@ -292,7 +331,7 @@ export function Journey() {
           <div className="mt-8 flex items-center gap-2" role="group" aria-label="Journey progress">
             {JOURNEY.map((j, i) => (
               <button
-                key={j.step} onClick={() => setStep(i)}
+                key={j.step} onClick={() => pickStep(i)}
                 aria-label={`Step ${j.step}: ${j.label}`}
                 /* The step rail above already carries aria-current, so these
                    shortcut dots only announce which step they jump to. */
@@ -305,9 +344,11 @@ export function Journey() {
               </button>
             ))}
             <div className="ml-auto flex gap-2">
-              <button className="btn btn-g !px-3 !py-1.5" onClick={() => setStep(s => Math.max(0, s - 1))}
+              <button className="btn btn-g !px-3 !py-1.5" aria-label="Previous step"
+                onClick={() => pickStep(Math.max(0, step - 1))}
                 disabled={step === 0}>&larr;</button>
-              <button className="btn btn-g !px-3 !py-1.5" onClick={() => setStep(s => Math.min(JOURNEY.length - 1, s + 1))}
+              <button className="btn btn-g !px-3 !py-1.5" aria-label="Next step"
+                onClick={() => pickStep(Math.min(JOURNEY.length - 1, step + 1))}
                 disabled={step === JOURNEY.length - 1}>&rarr;</button>
             </div>
           </div>
@@ -504,10 +545,13 @@ export function References() {
         list is the formal citation record.
       </p>
       {/* Each row uses minmax(0,1fr) so the text track cannot grow to the full
-          width of an unbroken URL, which would push the whole page sideways. */}
+          width of an unbroken URL, which would push the whole page sideways.
+          tabIndex -1 makes each entry a programmatic focus target, so a citation
+          followed from either mode lands focus here and not back at the top. */}
       <ol className="space-y-6">
         {REFERENCES.map((r, i) => (
-          <li key={r.key} id={`ref-${r.key}`} className="scroll-mt-28 grid grid-cols-[2.5rem_minmax(0,1fr)] gap-x-4">
+          <li key={r.key} id={`ref-${r.key}`} tabIndex={-1}
+            className="scroll-mt-28 grid grid-cols-[2.5rem_minmax(0,1fr)] gap-x-4 focus:outline-none focus-visible:outline-2 focus-visible:outline-cyan-400">
             <span className="font-sans text-[0.72rem] font-medium tabular-nums text-mute/80 pt-1">{String(i + 1).padStart(2, '0')}</span>
             <div className="prose-r min-w-0">
               <p className="text-[0.92rem] leading-relaxed text-sand/92">

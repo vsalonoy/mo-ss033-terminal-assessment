@@ -74,7 +74,9 @@ export default function App() {
 
   return (
     <SiteCtx.Provider value={state}>
-      <a href="#intro" className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:btn focus:btn-p">
+      {/* Targets <main>, not a section id. Presentation Mode mounts only the active
+          section, so "#intro" was a dead target on every slide but the first. */}
+      <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:btn focus:btn-p">
         Skip to content
       </a>
 
@@ -85,7 +87,8 @@ export default function App() {
       <TopBar />
       <SectionRail />
 
-      <main className={`relative z-10 ${mode === 'presentation' ? 'pt-14 pb-36' : 'pt-14'}`}>
+      <main id="main" tabIndex={-1}
+        className={`relative z-10 focus:outline-none ${mode === 'presentation' ? 'pt-14 pb-36' : 'pt-14'}`}>
         {mode === 'explore' ? (
           <>
             <Hero />
