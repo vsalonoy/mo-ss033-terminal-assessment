@@ -1,0 +1,110 @@
+@import '@fontsource-variable/plus-jakarta-sans/wght.css';
+@import '@fontsource-variable/plus-jakarta-sans/wght-italic.css';
+@import '@fontsource-variable/inter/wght.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root { color-scheme: dark; }
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+  /* One global switch. Anything decorative stops; nothing becomes unreadable. */
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after {
+      animation-duration: .001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: .001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  body {
+    @apply bg-ink-900 font-sans text-body text-sand antialiased;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    /* The page tint lives in the fixed AmbientBlooms layer instead of here.
+       A background-attachment:fixed gradient on body repaints the whole
+       viewport on every scroll frame. */
+  }
+
+  /* Inter's tabular figures keep counters and tables from shifting width. */
+  .tabular-nums, table, .stat-figure { font-variant-numeric: tabular-nums; }
+
+  :focus-visible {
+    outline: 2px solid theme('colors.cyan.400');
+    outline-offset: 3px;
+    border-radius: 3px;
+  }
+
+  ::selection { background: rgba(34,211,238,0.26); color: #fff; }
+
+  /* Charts draw their own focus ring; the default outline clips inside SVG. */
+  svg :focus-visible { outline: none; }
+}
+
+@layer components {
+  .wrap { @apply mx-auto w-full max-w-[1200px] px-5 sm:px-8; }
+
+  /* ---------- type roles ---------- */
+  .t-hero  { @apply font-display text-hero text-white; }
+  .t-sec   { @apply font-display text-sec text-white; }
+  .t-sub   { @apply font-display text-sub text-sand; }
+  .t-lede  { @apply font-sans text-lede text-mute max-w-reading; }
+  .t-body  { @apply font-sans text-body text-sand/90; }
+  .t-small { @apply font-sans text-small text-sand/85; }
+  .t-micro { @apply font-sans text-micro text-mute; }
+  .t-stat  { @apply font-display text-stat stat-figure; }
+  .t-label { @apply font-display text-label uppercase text-cyan-300; }
+  .prose-r { @apply max-w-reading text-body text-sand/85; }
+
+  .eyebrow {
+    @apply font-display text-label uppercase text-cyan-300 flex items-center gap-2.5;
+  }
+  .eyebrow::before {
+    content: '';
+    @apply inline-block h-px w-6 bg-cyan-400/60 shrink-0;
+  }
+
+  /* ---------- surfaces ---------- */
+  .card {
+    /* No backdrop-filter here. There are roughly forty cards, and the ambient
+       canvas behind them repaints every frame, so a backdrop blur on each one
+       forces the whole stack to re-sample and re-blur on every scroll frame.
+       A slightly more opaque fill gives the same separation for free. */
+    @apply rounded-xl border border-line bg-ink-700/80;
+    transition: border-color .32s cubic-bezier(.22,.61,.36,1), background-color .32s cubic-bezier(.22,.61,.36,1), transform .32s cubic-bezier(.22,.61,.36,1);
+  }
+  .card-hover:hover { @apply border-cyan-500/35 bg-ink-600/60; }
+
+  .chip {
+    @apply inline-flex items-center rounded-full border px-2.5 py-0.5 font-display text-[0.68rem] font-semibold tracking-wide;
+  }
+
+  .cite { @apply font-sans text-[0.74rem] text-cyan-300/75 tracking-tight; }
+
+  .rule { @apply h-px w-full bg-gradient-to-r from-transparent via-line to-transparent; }
+
+  /* ---------- controls ---------- */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5
+           font-display text-[0.86rem] font-semibold tracking-tight
+           transition-all duration-200 ease-out disabled:opacity-40 disabled:pointer-events-none;
+  }
+  .btn-p { @apply bg-cyan-400 text-ink-950 hover:bg-cyan-300 hover:shadow-[0_0_28px_-6px_rgba(34,211,238,0.55)]; }
+  .btn-g { @apply border border-line text-sand hover:border-cyan-500/45 hover:text-cyan-200 hover:bg-cyan-500/[0.06]; }
+
+  /* ---------- the scroll progress line under the top bar ---------- */
+  .progress-line { @apply h-px w-full origin-left bg-gradient-to-r from-cyan-500 via-cyan-300 to-iris-400; }
+}
+
+@layer utilities {
+  /* Used by the ambient layer and the hero so decoration never catches a click. */
+  .inert { pointer-events: none; user-select: none; }
+  .grid-fade {
+    -webkit-mask-image: linear-gradient(to bottom, transparent, black 12%, black 88%, transparent);
+            mask-image: linear-gradient(to bottom, transparent, black 12%, black 88%, transparent);
+  }
+}

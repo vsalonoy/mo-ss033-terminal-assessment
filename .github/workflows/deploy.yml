@@ -1,0 +1,58 @@
+name: Deploy to GitHub Pages
+
+# Publishes the site at https://vsalonoy.github.io/mo-ss033-terminal-assessment/
+#
+# Nothing happens until this file is pushed to the repository AND Pages is
+# switched to "GitHub Actions" in Settings > Pages. Until then this workflow
+# is inert, so committing it does not publish anything.
+
+on:
+  push:
+    branches: [main]
+  # Lets you publish on demand from the Actions tab rather than on every push.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deployment at a time. A newer run waits rather than cancelling a
+# half-finished publish, which could leave the live site broken.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # ci rather than install: it installs exactly what package-lock.json
+      # pins, so the published build matches the one tested locally.
+      - run: npm ci
+
+      # Fails the run on any TypeScript error, so a broken build is never published.
+      - run: npm run build
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
