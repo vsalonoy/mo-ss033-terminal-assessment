@@ -2,9 +2,10 @@ import { useState } from 'react';
 import { motion } from 'motion/react';
 import { Section, Reveal, Cite, Chip, Caveat } from './primitives';
 import { StepRates } from './viz';
+import { EvidenceCards, ImplementationMap } from './Evidence';
 import { usePrefersReducedMotion } from '../hooks/useSiteState';
 import {
-  PROPOSAL, JOURNEY, JOURNEY_CAVEAT, SMART, SMART_CAVEAT, EBET_DEDUCTION,
+  PROPOSAL, JOURNEY, JOURNEY_CAVEAT, JOURNEY_STAGES, SMART, SMART_CAVEAT, EBET_DEDUCTION,
   PROPOSAL_CRITERIA, RISKS, CONCLUSION, REFERENCES, PROJECT,
 } from '../data/research';
 
@@ -165,6 +166,10 @@ export function Proposal() {
           </div>
         </div>
       </Reveal>
+
+      <Reveal><ImplementationMap /></Reveal>
+
+      <EvidenceCards section="proposal" />
     </Section>
   );
 }
@@ -181,7 +186,39 @@ export function Journey() {
 
       <Caveat tone="rose">{JOURNEY_CAVEAT}</Caveat>
 
-      <div className="mt-12 grid lg:grid-cols-[22rem_minmax(0,1fr)] gap-8 items-start">
+      {/* The five stages the Assessment Guide names, mapped onto the six steps. */}
+      <Reveal>
+        <div className="mt-12">
+          <div className="eyebrow">The five stages, and where each one sits</div>
+          <ol className="mt-5 grid sm:grid-cols-3 lg:grid-cols-5 gap-3">
+            {JOURNEY_STAGES.map(st => {
+              const on = JOURNEY[step].step === st.step;
+              return (
+                <li key={st.stage}>
+                  <button
+                    type="button"
+                    onClick={() => setStep(JOURNEY.findIndex(j => j.step === st.step))}
+                    aria-pressed={on}
+                    className={`w-full h-full text-left card px-4 py-3.5 transition-colors ${
+                      on ? 'border-cyan-500/50 bg-cyan-500/[0.07]' : 'hover:border-line/80'}`}
+                  >
+                    <span className={`block font-display text-[0.88rem] font-bold leading-snug ${
+                      on ? 'text-cyan-200' : 'text-sand'}`}>{st.stage}</span>
+                    <span className="mt-1 block text-[0.74rem] text-mute">Step {st.step}</span>
+                  </button>
+                </li>
+              );
+            })}
+          </ol>
+          <p className="t-micro mt-3 max-w-reading">
+            Steps 1 and 5 are not among the five named stages but are kept because they carry
+            what the stages do not: what triggers the conversion, and what keeps the worker
+            solvent while it happens.
+          </p>
+        </div>
+      </Reveal>
+
+      <div className="mt-10 grid lg:grid-cols-[22rem_minmax(0,1fr)] gap-8 items-start">
         {/* step rail, with a spine that fills as the reader moves down it */}
         <div className="relative">
           <div aria-hidden className="absolute left-[1.42rem] top-4 bottom-4 w-px bg-line inert" />
@@ -235,7 +272,12 @@ export function Journey() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.38, ease: [0.22, 0.61, 0.36, 1] }}
           >
-            <div className="eyebrow">Step {JOURNEY[step].step} of {JOURNEY.length}</div>
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="eyebrow">Step {JOURNEY[step].step} of {JOURNEY.length}</div>
+              <Chip tone={JOURNEY[step].stage === 'Context' || JOURNEY[step].stage === 'Income support' ? 'neutral' : 'cyan'}>
+                {JOURNEY[step].stage}
+              </Chip>
+            </div>
             <h3 className="mt-3 font-display text-sub leading-tight text-sand">
               {JOURNEY[step].label}
             </h3>
@@ -317,12 +359,15 @@ export function Smart() {
 
                 {isOpen && (
                   <dl className="mt-4 space-y-3 border-t border-line/60 pt-4">
-                    {[['How', m.method], ['Data source', m.source], ['Time frame', m.timeframe],
+                    {[['Objective', m.objective], ['Target group', m.targetGroup],
+                      ['Baseline', m.baseline], ['Measurement tool', m.method],
+                      ['Data source', m.source], ['Time point', m.timeframe],
                       ['Responsible', m.owner], ['What it cannot tell you', m.assumption]].map(([k, v]) => (
                       <div key={k}>
                         <dt className="font-display text-[0.65rem] font-semibold uppercase tracking-[0.13em] text-mute">{k}</dt>
                         <dd className={`mt-0.5 text-[0.82rem] leading-relaxed ${
-                          k === 'What it cannot tell you' ? 'text-amber/90' : 'text-sand/85'}`}>{v}</dd>
+                          k === 'What it cannot tell you' ? 'text-amber/90'
+                          : k === 'Baseline' ? 'text-sand/75' : 'text-sand/85'}`}>{v}</dd>
                       </div>
                     ))}
                   </dl>
@@ -453,6 +498,11 @@ export function References() {
     <Section id="references" letter="L" label="References"
       title="References"
       lede={`${REFERENCES.length} sources, APA 7. Every URL was opened and checked against the claim it supports. Primary sources are used wherever one exists.`}>
+      <p className="t-micro mb-8 max-w-reading">
+        Sections B, D, E and F also carry evidence cards beside the claims themselves, showing what
+        each source reports and the area it covers. Those are a shortcut for checking a figure. This
+        list is the formal citation record.
+      </p>
       {/* Each row uses minmax(0,1fr) so the text track cannot grow to the full
           width of an unbroken URL, which would push the whole page sideways. */}
       <ol className="space-y-6">

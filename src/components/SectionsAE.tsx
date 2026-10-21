@@ -3,8 +3,9 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Section, Reveal, Cite, Chip, Caveat } from './primitives';
 import { usePrefersReducedMotion } from '../hooks/useSiteState';
 import { BarsH, WageTrajectory, ProportionRing } from './viz';
+import { EvidenceCards } from './Evidence';
 import {
-  PROJECT, EXPOSURE_BY_REGION, EXPOSURE_NOTES, EXPOSURE_VS_ASEAN, STAKEHOLDERS, STAKEHOLDER_LIMIT,
+  PROJECT, AUDIENCE, EXPOSURE_BY_REGION, EXPOSURE_NOTES, EXPOSURE_VS_ASEAN, STAKEHOLDERS, STAKEHOLDER_LIMIT,
   SOLUTIONS, RANKED, CRITERIA, CRITERIA_PROVENANCE, RANKING_NOTE, SG_OUTCOMES, SG_CAVEAT,
   SG_WAGE_TRAJECTORY, SKILLSFUTURE_TAKEUP,
 } from '../data/research';
@@ -38,6 +39,37 @@ export function Intro() {
           </dl>
         </Reveal>
       </div>
+      <Reveal>
+        <div className="mt-12">
+          <div className="eyebrow">Who this is written for</div>
+          <div className="mt-5 grid lg:grid-cols-2 gap-x-10 gap-y-6">
+            <div className="lg:col-span-2 card p-6 border-cyan-500/25">
+              <div className="font-display text-[0.66rem] font-semibold uppercase tracking-[0.13em] text-cyan-300">
+                Intended audience
+              </div>
+              <p className="mt-2 text-[1rem] leading-relaxed text-sand">{AUDIENCE.who}</p>
+            </div>
+            {([
+              ['What they already understand', AUDIENCE.known],
+              ['What this adds', AUDIENCE.needed],
+            ] as const).map(([k, v]) => (
+              <div key={k} className="border-l border-line pl-5">
+                <div className="font-display text-[0.66rem] font-semibold uppercase tracking-[0.13em] text-mute">{k}</div>
+                <p className="mt-2 text-[0.9rem] leading-relaxed text-sand/88">{v}</p>
+              </div>
+            ))}
+            <div className="lg:col-span-2 border-l border-cyan-500/50 pl-5">
+              <div className="font-display text-[0.66rem] font-semibold uppercase tracking-[0.13em] text-cyan-300">
+                What they should be able to do after reading
+              </div>
+              <p className="mt-2 text-[0.9rem] leading-relaxed text-sand/88">
+                {AUDIENCE.consider} <Cite keys={AUDIENCE.ref} />
+              </p>
+            </div>
+          </div>
+        </div>
+      </Reveal>
+
       <Caveat>
         This website is the Terminal Assessment deliverable. It carries the full research narrative,
         the five-solution evaluation, the selected solution, the Philippine contextualisation, the
@@ -128,6 +160,8 @@ export function Challenge() {
           </div>
         </Reveal>
       </div>
+
+      <EvidenceCards section="challenge" />
     </Section>
   );
 }
@@ -272,6 +306,8 @@ export function Solutions() {
               <p className="mt-2 text-[0.94rem] leading-relaxed text-sand/92">{sol.what}</p>
               <div className="eyebrow mt-6">Who runs it</div>
               <p className="mt-2 text-[0.94rem] leading-relaxed text-sand/92">{sol.who}</p>
+              <div className="eyebrow mt-6">Who it is for</div>
+              <p className="mt-2 text-[0.94rem] leading-relaxed text-sand/92">{sol.targetPopulation}</p>
               <div className="eyebrow mt-6">Status</div>
               <p className="mt-2 text-[0.94rem] leading-relaxed text-sand/92">{sol.status}</p>
               <div className="eyebrow mt-6">Detail</div>
@@ -425,6 +461,8 @@ export function Solutions() {
           </div>
         </div>
       </Reveal>
+
+      <EvidenceCards section="solutions" />
     </Section>
   );
 }
@@ -491,6 +529,8 @@ export function Ranking() {
           <Caveat tone="rose">{SG_CAVEAT}</Caveat>
         </div>
       </Reveal>
+
+      <EvidenceCards section="ranking" />
     </Section>
   );
 }
