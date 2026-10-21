@@ -130,7 +130,11 @@ export function Eyebrow({ children }: { children: ReactNode }) {
 export function Section({ id, letter, label, title, lede, children }:
   { id: string; letter: string; label: string; title: string; lede?: string; children: ReactNode }) {
   return (
-    <section id={id} aria-label={`${letter}. ${label}`} className="scroll-mt-24 py-24 sm:py-28">
+    /* tabIndex -1 makes the section a programmatic focus target, so choosing it
+       from the responsive Sections menu lands keyboard focus on the destination
+       rather than leaving it on a control that has just unmounted. */
+    <section id={id} aria-label={`${letter}. ${label}`} tabIndex={-1}
+      className="scroll-mt-24 py-24 sm:py-28 focus:outline-none focus-visible:outline-2 focus-visible:outline-cyan-400">
       <div className="wrap">
         <Reveal>
           <Eyebrow>{letter} &nbsp;/&nbsp; {label}</Eyebrow>

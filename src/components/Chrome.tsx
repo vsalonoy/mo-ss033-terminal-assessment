@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useSite } from '../hooks/useSiteState';
 import { ScrollProgress } from './Ambient';
@@ -8,6 +8,95 @@ import { SECTIONS, PROJECT } from '../data/research';
 export function TopBar() {
   const { mode, setMode, index, go } = useSite();
   const [open, setOpen] = useState(false);
+
+  /**
+   * The section chosen from the responsive menu, navigated only once the menu's
+   * exit animation has finished.
+   *
+   * Navigating while that animation runs does not work. The menu animates
+   * `height: auto -> 0`, and that measurement saves and restores the document
+   * scroll position, which was (0, 0) at the moment of the click. The restore
+   * lands after go() has already scrolled, so the page snaps back to the top and
+   * the selection appears to do nothing. Deferring to onExitComplete ties the
+   * navigation to the animation lifecycle rather than to a guessed delay.
+   */
+  const [pending, setPending] = useState<number | null>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  /* Dismissal sends focus back to the trigger; selection sends it forward to the
+     destination. The exit handler needs to know which happened. */
+  const returnFocus = useRef(false);
+
+  const dismiss = useCallback(() => {
+    returnFocus.current = true;
+    setPending(null);
+    setOpen(false);
+  }, []);
+
+  /* Escape closes the menu. Captured on the way down so it runs before the global
+     shortcut handler, which would otherwise also leave Presentation Mode. */
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      e.preventDefault();
+      e.stopPropagation();
+      dismiss();
+    };
+    window.addEventListener('keydown', onKey, true);
+    return () => window.removeEventListener('keydown', onKey, true);
+  }, [open, dismiss]);
+
+  /* Click outside closes the menu. pointerdown fires before the menu unmounts, and
+     clicks on the trigger are left alone so it keeps working as a toggle. */
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: PointerEvent) => {
+      const t = e.target as Node | null;
+      if (!t) return;
+      if (menuRef.current?.contains(t) || triggerRef.current?.contains(t)) return;
+      dismiss();
+    };
+    document.addEventListener('pointerdown', onDown, true);
+    return () => document.removeEventListener('pointerdown', onDown, true);
+  }, [open, dismiss]);
+
+  /* The menu is hidden from xl upwards. Closing it on the way past that breakpoint
+     stops the trigger reporting aria-expanded="true" while invisible. */
+  useEffect(() => {
+    if (!open) return;
+    const mq = window.matchMedia('(min-width: 1280px)');
+    const onChange = () => { if (mq.matches) dismiss(); };
+    onChange();
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, [open, dismiss]);
+
+  /**
+   * Runs after the menu has finished animating out, so the scroll restore
+   * described above has already happened and cannot undo the navigation.
+   */
+  const onExitComplete = useCallback(() => {
+    if (returnFocus.current) {
+      returnFocus.current = false;
+      triggerRef.current?.focus();
+      return;
+    }
+    if (pending === null) return;
+    const i = pending;
+    setPending(null);
+    go(i);
+    /* Move focus to the destination so a keyboard reader lands on the new section.
+       Presentation Mode mounts the section a few frames later, so poll for it.
+       preventScroll keeps focusing from fighting the scroll go() just started. */
+    let tries = 48;
+    const land = () => {
+      const el = document.getElementById(SECTIONS[i].id);
+      if (el) { el.focus({ preventScroll: true }); return; }
+      if (tries-- > 0) requestAnimationFrame(land);
+    };
+    requestAnimationFrame(land);
+  }, [pending, go]);
 
   return (
     <div className="fixed top-0 inset-x-0 z-40 border-b border-line bg-ink-900/85 backdrop-blur-md">
@@ -41,7 +130,13 @@ export function TopBar() {
 
         <div className="ml-auto xl:ml-0 flex items-center gap-2 shrink-0">
           <button
-            onClick={() => setOpen(o => !o)}
+            ref={triggerRef}
+            onClick={() => setOpen(o => {
+              /* Reopening cancels a pending selection, so an interrupted exit
+                 animation cannot navigate somewhere unexpected later. */
+              if (!o) { setPending(null); returnFocus.current = false; }
+              return !o;
+            })}
             aria-expanded={open} aria-controls="section-menu" aria-label="Section list"
             className="xl:hidden btn btn-g !px-2.5 !py-1.5 !text-[0.7rem]"
           >Sections</button>
@@ -61,9 +156,10 @@ export function TopBar() {
 
       {mode === 'explore' && <ScrollProgress />}
 
-      <AnimatePresence>
+      <AnimatePresence onExitComplete={onExitComplete}>
         {open && (
           <motion.div
+            ref={menuRef}
             id="section-menu" className="xl:hidden border-t border-line bg-ink-800/95"
             initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.22 }}
@@ -72,7 +168,7 @@ export function TopBar() {
               {SECTIONS.map((s, i) => (
                 <li key={s.id}>
                   <button
-                    onClick={() => { go(i); setOpen(false); }}
+                    onClick={() => { setPending(i); setOpen(false); }}
                     className={`w-full text-left py-2 flex gap-3 text-[0.9rem] ${
                       i === index ? 'text-cyan-300' : 'text-sand/90 hover:text-cyan-300'}`}
                   >
