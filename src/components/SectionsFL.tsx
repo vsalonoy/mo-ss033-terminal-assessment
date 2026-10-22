@@ -1,12 +1,12 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
-import { Section, Reveal, Cite, Chip, Caveat, Disclosure } from './primitives';
+import { Section, Reveal, Cite, Chip, Caveat, Disclosure, REF_FOLLOWED, type RefFollowed } from './primitives';
 import { StepRates } from './viz';
 import { EvidenceCards, ImplementationMap } from './Evidence';
 import { usePrefersReducedMotion } from '../hooks/useSiteState';
 import {
   PROPOSAL, JOURNEY, JOURNEY_CAVEAT, JOURNEY_STAGES, SMART, SMART_CAVEAT, EBET_DEDUCTION,
-  PROPOSAL_CRITERIA, RISKS, CONCLUSION, REFERENCES, PROJECT,
+  PROPOSAL_CRITERIA, RISKS, CONCLUSION, REFERENCES, PROJECT, type RefKey,
 } from '../data/research';
 
 /* ------------------------------------------------------------------ F */
@@ -114,8 +114,7 @@ export function Proposal() {
 
         The three blocks below are the supporting detail. They are folded rather
         than cut, because section F ran to roughly twice the length of any other
-        section, which made it the one slide a presenter had to scroll through to
-        reach the end of. Nothing has been removed and nothing has changed section.
+        section. Nothing has been removed and nothing has changed section.
         Reveal is deliberately not used inside them: a scroll-triggered entrance
         cannot fire reliably on content that was display:none a moment earlier.
       */}
@@ -535,6 +534,20 @@ export function Conclusion() {
 
 /* ------------------------------------------------------------------ L */
 export function References() {
+  /* The entry the reader has just jumped to from a citation, if any. A cold load
+     of a reference link has nowhere to go back to, so it offers no button. */
+  const [back, setBack] = useState<RefKey | null>(null);
+  useEffect(() => {
+    const onFollow = (e: Event) => setBack((e as CustomEvent<RefFollowed>).detail.key);
+    const onPop = () => setBack(k => (k && location.hash === `#ref-${k}` ? k : null));
+    window.addEventListener(REF_FOLLOWED, onFollow);
+    window.addEventListener('popstate', onPop);
+    return () => {
+      window.removeEventListener(REF_FOLLOWED, onFollow);
+      window.removeEventListener('popstate', onPop);
+    };
+  }, []);
+
   return (
     <Section id="references" letter="L" label="References"
       title="References"
@@ -544,29 +557,38 @@ export function References() {
         each source reports and the area it covers. Those are a shortcut for checking a figure. This
         list is the formal citation record.
       </p>
-      {/* Each row uses minmax(0,1fr) so the text track cannot grow to the full
-          width of an unbroken URL, which would push the whole page sideways.
-          tabIndex -1 makes each entry a programmatic focus target, so a citation
-          followed from either mode lands focus here and not back at the top. */}
-      <ol className="space-y-6">
-        {REFERENCES.map((r, i) => (
+      {/* APA 7 list: unnumbered, alphabetical, hanging indent. The order is
+          derived here rather than trusted to the data, so it cannot drift when an
+          entry's author changes. [overflow-wrap:anywhere] stops an unbroken URL
+          from pushing the page sideways on a phone. tabIndex -1 makes each entry a
+          focus target, so a followed citation lands focus here, not at the top. */}
+      <ul className="space-y-5 max-w-reading">
+        {[...REFERENCES]
+          .sort((a, b) => a.author.localeCompare(b.author) || a.year.localeCompare(b.year))
+          .map(r => (
           <li key={r.key} id={`ref-${r.key}`} tabIndex={-1}
-            className="scroll-mt-28 grid grid-cols-[2.5rem_minmax(0,1fr)] gap-x-4 focus:outline-none focus-visible:outline-2 focus-visible:outline-cyan-400">
-            <span className="font-mono text-[0.72rem] font-medium text-mute/80 pt-1">{String(i + 1).padStart(2, '0')}</span>
-            <div className="prose-r min-w-0">
-              <p className="text-[0.92rem] leading-relaxed text-sand/92">
-                {r.author} ({r.year}). <em className="text-sand">{r.title}</em>
-                {r.container && <>. {r.container}</>}.{' '}
-                <a href={r.url} target="_blank" rel="noopener noreferrer"
-                  className="[overflow-wrap:anywhere] text-cyan-300 underline decoration-cyan-500/40 underline-offset-2 hover:decoration-cyan-300">
-                  {r.url}
-                </a>
-              </p>
-              {r.note && <p className="mt-2 text-[0.8rem] leading-relaxed text-mute">{r.note}</p>}
-            </div>
+            className="scroll-mt-28 rounded focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cyan-400">
+            <p className="pl-8 -indent-8 text-[0.92rem] leading-relaxed text-sand/92">
+              {/* APA 7 closes the author element with a period; initials already supply one. */}
+              {r.author.endsWith('.') ? r.author : `${r.author}.`} ({r.year}).{' '}
+              {r.part ? r.title : <em className="text-sand">{r.title}</em>}
+              {r.container && <>. {r.part ? <em className="text-sand">{r.container}</em> : r.container}</>}.{' '}
+              {r.retrieved && <>Retrieved {r.retrieved}, from </>}
+              <a href={r.url} target="_blank" rel="noopener noreferrer"
+                className="[overflow-wrap:anywhere] text-cyan-300 underline decoration-cyan-500/40 underline-offset-2 hover:decoration-cyan-300">
+                {r.url}<span className="sr-only"> (opens in a new tab)</span>
+              </a>
+            </p>
+            {r.note && <p className="mt-2 pl-8 text-[0.8rem] leading-relaxed text-mute">{r.note}</p>}
+            {back === r.key && (
+              <button type="button" onClick={() => history.back()}
+                className="mt-2 ml-8 btn btn-g !px-3 !py-1 !text-[0.78rem]">
+                Back to the citation
+              </button>
+            )}
           </li>
         ))}
-      </ol>
+      </ul>
     </Section>
   );
 }

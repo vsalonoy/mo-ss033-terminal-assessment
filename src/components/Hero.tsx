@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useRef, useState } from 'react';
 import { motion, useScroll, useTransform } from 'motion/react';
 import ParticleField from './ParticleField';
-import { usePrefersReducedMotion, useSite } from '../hooks/useSiteState';
+import { usePrefersReducedMotion } from '../hooks/useSiteState';
 import { PROJECT, HEADLINE_STATS } from '../data/research';
 import { Counter, Cite } from './primitives';
 
@@ -9,7 +9,6 @@ const WORDS = PROJECT.headline.split(' ');
 
 export default function Hero() {
   const reduced = usePrefersReducedMotion();
-  const { setMode, go } = useSite();
   const [skipped, setSkipped] = useState(reduced);
   const wrapRef = useRef<HTMLElement>(null);
 
@@ -92,9 +91,6 @@ export default function Hero() {
             transition={{ duration: 0.6, delay: d(0.3 + WORDS.length * 0.1 + 0.35) }}
           >
             <button className="btn btn-p" onClick={skip}>Skip intro</button>
-            <button className="btn btn-g" onClick={() => { setMode('presentation'); go(0); }}>
-              Presentation mode
-            </button>
           </motion.div>
 
           <motion.div

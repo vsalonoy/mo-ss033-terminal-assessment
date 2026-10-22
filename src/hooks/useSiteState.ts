@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, createContext, useContext } from 'react';
+import { useEffect, useState, createContext, useContext } from 'react';
 import { SECTIONS } from '../data/research';
 
 /* Reduced motion, live-updating. Every animated component reads this. */
@@ -17,15 +17,9 @@ export function usePrefersReducedMotion(): boolean {
   return reduced;
 }
 
-export type Mode = 'explore' | 'presentation';
-
 export interface SiteState {
-  mode: Mode;
-  setMode: (m: Mode) => void;
-  index: number;            // current section index, used by both modes
-  go: (i: number) => void;
-  next: () => void;
-  prev: () => void;
+  index: number;            // section currently on screen
+  go: (i: number) => void;  // scroll to a section
   reduced: boolean;
 }
 
@@ -37,15 +31,14 @@ export const useSite = (): SiteState => {
 };
 
 /**
- * Tracks which section is on screen in Explore Mode.
+ * Tracks which section is on screen.
  * Measured from element positions rather than IntersectionObserver ratios:
  * sections here are far taller than any sensible observer band, so their
  * intersection ratios stay tiny and rank unreliably against each other.
  * Reads are batched into a rAF, so this costs one layout read per frame at most.
  */
-export function useScrollSpy(enabled: boolean, onChange: (i: number) => void) {
+export function useScrollSpy(onChange: (i: number) => void) {
   useEffect(() => {
-    if (!enabled) return;
     let frame = 0;
 
     const measure = () => {
@@ -76,32 +69,53 @@ export function useScrollSpy(enabled: boolean, onChange: (i: number) => void) {
       window.removeEventListener('scroll', schedule);
       window.removeEventListener('resize', schedule);
     };
-  }, [enabled, onChange]);
+  }, [onChange]);
 }
 
-/* Keyboard navigation. Active in both modes; arrows only drive Presentation Mode. */
-export function useKeyboardNav(s: SiteState) {
-  const handler = useCallback((e: KeyboardEvent) => {
-    const t = e.target as HTMLElement | null;
-    if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
-    if (e.metaKey || e.ctrlKey || e.altKey) return;
+/** Where a followed citation came from. Stored on the history entry it left. */
+export interface CiteReturn { id: string; y: number }
 
-    if (e.key === 'p' || e.key === 'P') {
-      e.preventDefault();
-      s.setMode(s.mode === 'presentation' ? 'explore' : 'presentation');
-      return;
-    }
-    if (s.mode !== 'presentation') return;
-
-    if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); s.next(); }
-    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); s.prev(); }
-    else if (e.key === 'Home') { e.preventDefault(); s.go(0); }
-    else if (e.key === 'End') { e.preventDefault(); s.go(SECTIONS.length - 1); }
-    else if (e.key === 'Escape') { e.preventDefault(); s.setMode('explore'); }
-  }, [s]);
-
+/**
+ * Fragment navigation that survives React rendering after the browser.
+ *
+ * On a cold load of a link such as "#ref-ra11962" the browser looks for the
+ * target before React has rendered it, finds nothing, and stays at the top. The
+ * target is scrolled to here instead, once the fonts have settled so the layout
+ * it lands on is final, and focus moves with it.
+ *
+ * Back from a followed citation returns to the citation rather than wherever the
+ * browser's own scroll restoration happens to put the reader.
+ */
+export function useHashNavigation() {
   useEffect(() => {
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [handler]);
+    let cancelled = false;
+    const land = (el: HTMLElement) => {
+      el.scrollIntoView({ behavior: 'instant', block: 'start' });
+      el.focus({ preventScroll: true });
+    };
+    const target = () => {
+      const id = decodeURIComponent(location.hash.slice(1));
+      return id ? document.getElementById(id) : null;
+    };
+
+    if (location.hash) {
+      document.fonts.ready.then(() => requestAnimationFrame(() => {
+        const el = target();
+        if (!cancelled && el) land(el);
+      }));
+    }
+
+    const onPop = (e: PopStateEvent) => {
+      const back = (e.state as { citeReturn?: CiteReturn } | null)?.citeReturn;
+      if (back) {
+        window.scrollTo({ top: back.y, behavior: 'instant' });
+        document.getElementById(back.id)?.focus({ preventScroll: true });
+        return;
+      }
+      const el = target();
+      if (el) land(el);
+    };
+    window.addEventListener('popstate', onPop);
+    return () => { cancelled = true; window.removeEventListener('popstate', onPop); };
+  }, []);
 }

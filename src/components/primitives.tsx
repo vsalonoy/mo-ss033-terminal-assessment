@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useId, useRef, useState, type MouseEvent, type ReactNode } from 'react';
 import { motion, useInView, useMotionValue, animate } from 'motion/react';
-import { usePrefersReducedMotion, useSite } from '../hooks/useSiteState';
-import { refMap, SECTIONS, type RefKey } from '../data/research';
+import { usePrefersReducedMotion, type CiteReturn } from '../hooks/useSiteState';
+import { refMap, type RefKey } from '../data/research';
 
 /**
  * Scroll-triggered entrance. Collapses to a plain element when motion is reduced.
@@ -49,75 +49,78 @@ export function Counter({ to, decimals = 0, suffix = '', prefix = '', immediate 
   return <span ref={ref} className="tabular-nums">{prefix}{shown.toFixed(decimals)}{suffix}</span>;
 }
 
-const REFERENCES_INDEX = SECTIONS.findIndex(s => s.id === 'references');
+/** Announced when a citation is followed, so the reference entry can offer a way back. */
+export const REF_FOLLOWED = 'ref-followed';
+export interface RefFollowed { key: RefKey }
+
+/* The name a citation shows: the first author's surname or the group author.
+   Acts are cited by their number, since that is how the reference list opens them. */
+const citeName = (k: RefKey) => {
+  const a = refMap[k].author;
+  return k.startsWith('ra') ? a.split(',')[0] : a.replace(/,.*$/, '');
+};
 
 /**
- * Scrolls to a reference entry once it is actually in the document.
+ * An APA 7 parenthetical citation that resolves to its entry in section L.
  *
- * Presentation Mode mounts only the active section, and AnimatePresence runs in
- * `mode="wait"`, so section L does not exist for several frames after it is
- * selected. A single requestAnimationFrame lands too early and the jump is lost,
- * which is why this polls for the element instead of assuming it is there.
- */
-function revealReference(key: RefKey, smooth: boolean) {
-  let tries = 48; // ~0.8s at 60fps; the exit transition is 0.14s
-  const tick = () => {
-    const el = document.getElementById(`ref-${key}`);
-    if (el) {
-      el.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'start' });
-      /* Move focus with the eye, so a keyboard reader lands on the entry rather
-         than keeping focus on a citation that is now off screen. */
-      el.focus({ preventScroll: true });
-      return;
-    }
-    if (tries-- > 0) requestAnimationFrame(tick);
-  };
-  requestAnimationFrame(tick);
-}
-
-/**
- * A citation that resolves to its reference entry in section L.
+ * Works are listed alphabetically inside the parentheses, and works by the same
+ * author share one name with their years listed after it, as in
+ * (International Labour Organization, 2026a, 2026b).
  *
- * Explore Mode renders every section, so the plain fragment link is left to do
- * its own work: the URL updates and Back behaves as a reader expects.
- * Presentation Mode has to activate section L first, so there the anchor is
- * intercepted. It stays an anchor with a real href either way, which is what
- * keeps it focusable, Enter-activatable and open-in-new-tab friendly.
+ * Each year stays an anchor with a real href, which keeps it focusable,
+ * Enter-activatable and open-in-new-tab friendly. A plain click is handled here
+ * so that Back returns to this citation: the entry being left records where the
+ * reader was, and the jump to the reference is pushed as a new entry.
  */
 export function Cite({ keys }: { keys: RefKey[] }) {
-  const { mode, go } = useSite();
   const reduced = usePrefersReducedMotion();
+  const base = useId();
 
-  const jump = useCallback((e: MouseEvent<HTMLAnchorElement>, k: RefKey) => {
-    if (mode !== 'presentation') return;      // native anchor is correct here
+  const follow = useCallback((e: MouseEvent<HTMLAnchorElement>, k: RefKey) => {
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+    const target = document.getElementById(`ref-${k}`);
+    if (!target) return;                       // let the browser handle it
     e.preventDefault();
-    go(REFERENCES_INDEX);
-    /* replaceState rather than pushState: the slide change is the navigation, and
-       a pushed hash would leave a Back step that cannot restore the slide. */
-    history.replaceState(null, '', `#ref-${k}`);
-    revealReference(k, !reduced);
-  }, [mode, go, reduced]);
+    const back: CiteReturn = { id: e.currentTarget.id, y: Math.round(window.scrollY) };
+    history.replaceState({ ...(history.state ?? {}), citeReturn: back }, '');
+    history.pushState({ refFrom: back.id }, '', `#ref-${k}`);
+    target.scrollIntoView({ behavior: reduced ? 'instant' : 'smooth', block: 'start' });
+    target.focus({ preventScroll: true });
+    window.dispatchEvent(new CustomEvent<RefFollowed>(REF_FOLLOWED, { detail: { key: k } }));
+  }, [reduced]);
+
+  /* Group by displayed name, then order the groups alphabetically. */
+  const groups = new Map<string, RefKey[]>();
+  for (const k of keys) groups.set(citeName(k), [...(groups.get(citeName(k)) ?? []), k]);
+  const ordered = [...groups.entries()].sort(([a], [b]) => a.localeCompare(b));
+
+  const link = (k: RefKey, label: string) => (
+    <a
+      id={`cite-${base}-${k}`}
+      href={`#ref-${k}`}
+      onClick={e => follow(e, k)}
+      className="hover:text-cyan-300 underline decoration-dotted decoration-line/60 underline-offset-2"
+    >{label}</a>
+  );
 
   return (
     <span className="cite">
-      {keys.map((k, i) => {
-        const r = refMap[k];
-        const y = r.year.split(',')[0];
-        const name = k.startsWith('ra') ? r.author.split(',')[0] : r.author.replace(/,.*$/, '');
-        return (
-          <span key={k}>
-            {i > 0 && '; '}
-            <a
-              href={`#ref-${k}`}
-              onClick={e => jump(e, k)}
-              className="hover:text-cyan-300 underline decoration-dotted decoration-line/60 underline-offset-2"
-            >
-              {name}, {y}
-            </a>
-          </span>
-        );
-      })}
+      (
+      {ordered.map(([name, ks], gi) => (
+        <span key={name}>
+          {gi > 0 && '; '}
+          {ks.map((k, i) => {
+            const y = refMap[k].year.split(',')[0];
+            return (
+              <span key={k}>
+                {i > 0 && ', '}
+                {link(k, i === 0 ? `${name}, ${y}` : y)}
+              </span>
+            );
+          })}
+        </span>
+      ))}
+      )
     </span>
   );
 }
@@ -126,7 +129,7 @@ export function Eyebrow({ children }: { children: ReactNode }) {
   return <div className="eyebrow">{children}</div>;
 }
 
-/* Section shell. id is the scroll target and the Presentation Mode anchor. */
+/* Section shell. id is the scroll target for the section menu and rail. */
 export function Section({ id, letter, label, title, lede, children }:
   { id: string; letter: string; label: string; title: string; lede?: string; children: ReactNode }) {
   return (
@@ -160,8 +163,8 @@ export function Chip({ children, tone = 'neutral' }:
 
 /**
  * A folded block, used in section F where the proposal runs long enough that
- * presenting it as a single slide means scrolling past the argument to reach the
- * supporting detail.
+ * the supporting detail would otherwise push the argument's conclusion a long
+ * way down the page.
  *
  * Nothing is removed and nothing moves section: the content stays where it was
  * and starts folded. The panel element is always rendered so `aria-controls`

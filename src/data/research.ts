@@ -1,6 +1,6 @@
 /**
  * Centralised research data for the MO-SS033 Terminal Assessment website.
- * Every section reads from this file. Explore Mode and Presentation Mode share it.
+ * Every section reads from this file.
  * Nothing here is invented: each claim carries the reference key it comes from.
  */
 
@@ -13,10 +13,15 @@ export type RefKey =
 export interface Reference {
   key: RefKey; author: string; year: string; title: string;
   container?: string; url: string; note?: string;
+  /** Part of a larger work (a news article, a chapter in a survey). APA 7 italicises
+      the larger work, not the part, so the container is set in italics instead. */
+  part?: boolean;
+  /** For an undated page that changes over time, APA 7 adds the date it was read. */
+  retrieved?: string;
 }
 
 export const REFERENCES: Reference[] = [
-  { key:'adb2020', author:'Asian Development Bank', year:'2020, December 18',
+  { key:'adb2020', author:'Asian Development Bank', year:'2020',
     title:'Job creation and skills development in the Philippines (Technical assistance performance evaluation report)',
     container:'Independent Evaluation Department',
     url:'https://www.adb.org/documents/technical-assistance-performance-evaluation-report-job-creation-and-skills-development' },
@@ -24,33 +29,33 @@ export const REFERENCES: Reference[] = [
     title:'How the Philippines can prepare its workers for automation', container:'Development Asia',
     url:'https://development.asia/explainer/how-philippines-can-prepare-its-workers-automation' },
   { key:'dagooc2026', author:'Dagooc, E. M.', year:'2026, June 13',
-    title:'Philippines BPO sector grows 4% to 1.68M despite AI fears', container:'The Freeman',
+    title:'Philippines BPO sector grows 4% to 1.68M despite AI fears', container:'The Freeman', part:true,
     url:'https://www.philstar.com/nation/2026/06/13/2534925/philippines-bpo-sector-grows-4-168m-despite-ai-fears' },
   { key:'dole', author:'Department of Labor and Employment', year:'n.d.',
-    title:'JobStart Philippines Program', url:'https://jobstart.philjobnet.gov.ph/' },
-  { key:'huynh2026', author:'Huynh, P.', year:'2026, February 5',
+    title:'JobStart Philippines Program', retrieved:'October 22, 2026', url:'https://jobstart.philjobnet.gov.ph/' },
+  { key:'huynh2026', author:'Huynh, P.', year:'2026',
     title:'Generative AI and jobs in the Philippines: Labour market exposure and policy implications',
     container:'International Labour Organization',
     url:'https://www.ilo.org/publications/generative-ai-and-jobs-philippines-labour-market-exposure-and-policy' },
   { key:'ilo2026a', author:'International Labour Organization', year:'2026a, July 8',
     title:'AI may affect nearly 80 million workers in the ASEAN region, but large-scale job disruption not yet seen',
     url:'https://www.ilo.org/resource/news/ai-may-affect-nearly-80-million-workers-asean-region-large-scale-job' },
-  { key:'ilo2026b', author:'International Labour Organization', year:'2026b, July 8',
+  { key:'ilo2026b', author:'International Labour Organization', year:'2026b',
     title:'Generative AI and labour markets in ASEAN: Significant exposure, limited disruption, uneven preparedness',
     url:'https://www.ilo.org/publications/generative-ai-and-labour-markets-asean-significant-exposure-limited' },
   { key:'khan2026', author:'Khan, A.', year:'2026, August 5',
     title:'Generative AI puts Philippines BPO jobs under pressure as government races to reskill workforce',
     container:'People Matters SEA',
     url:'https://sea.peoplemattersglobal.com/news/ai-and-emerging-tech/generative-ai-puts-philippines-bpo-jobs-under-pressure-as-government-races-to-reskill-workforce-51271' },
-  { key:'malaya2025', author:'Malaya Business Insight', year:'2025, September 29',
-    title:'IT-BPM to kickstart govt-approved P740M upskill plan in H2',
+  { key:'malaya2025', author:'Isip, I.', year:'2025, May 21',
+    title:'IT-BPM to kickstart govt-approved P740M upskill plan in H2', container:'Malaya Business Insight', part:true,
     url:'https://malaya.com.ph/business/business-news/it-bpm-to-kickstart-govt-approved-p740m-upskill-plan-in-h2' },
   { key:'moe2025', author:'Ministry of Education Singapore', year:'2025, November 5',
     title:'Considerations and efforts taken to increase usage of $500 SkillsFuture Credits before its expiry end-2025 [Parliamentary reply]',
     url:'https://www.moe.gov.sg/news/parliamentary-replies/20251105-considerations-and-efforts-taken-to-increase-usage-of-$500-skillsfuture-credits-before-its-expiry-end-2025' },
   { key:'mti2025', author:'Ministry of Trade and Industry Singapore', year:'2025, February 14',
     title:"Impact evaluation of Workforce Singapore's place-and-train Career Conversion Programme",
-    container:'Economic Survey of Singapore',
+    container:'Economic Survey of Singapore', part:true,
     url:'https://www.meti.gov.sg/resources/economic-survey-of-singapore/economic-survey-of-singapore-and-feature-articles/impact-evaluation-of-workforce-singapore-s-place-and-train-career-conversion-programme/',
     note:'The paper carries a disclaimer that the views are the authors’ own and do not necessarily reflect those of the Ministry of Manpower, the Ministry of Trade and Industry, Workforce Singapore, or the Government of Singapore, so the figures are a government-published study rather than an agency position. The article appeared in the Economic Survey of Singapore; the site states it moved to meti.gov.sg on 1 October 2026.' },
   { key:'psa2026', author:'Philippine Statistics Authority', year:'2026, September 8',
@@ -160,7 +165,7 @@ export const PROJECT = {
   title: 'Workplace Automation and Filipino Workers',
   subtitle: 'Evaluating reskilling, job redesign and career conversion, and proposing a Philippine place-and-train track',
   headline: 'The future of Filipino work is changing.',
-  version: 'v2.3 draft',
+  version: 'v2.4 draft',
   draftTarget: '24 October 2026',
   finalDeadline: '7 November 2026, 11:59 PM',
   focusIssue:

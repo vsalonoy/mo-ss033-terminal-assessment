@@ -16,12 +16,13 @@ stakeholders, risks and references.
 The site **is** published, at `https://vsalonoy.github.io/mo-ss033-terminal-assessment/`,
 served by the workflow in `.github/workflows/deploy.yml` from the `main` branch.
 
-What is live is **not** what is in this folder. The published build is the earlier v2.1
-commit. This working copy is the **v2.3 release candidate**: it adds the seven approved
-enhancements and the QA corrections that followed them, and it has not been pushed.
+What is live is **not** what is in this folder. The published build is commit `0e6c420`
+(v2.3 with the Sections menu fix). This working copy is the **v2.4 draft**: the Package 2 visual
+refinement plus the audit remediation (Presentation Mode removed, citation and reference
+navigation, APA reference formatting). It has not been pushed.
 
 Pushing `main` is what replaces the live site. Until that happens the two differ, and a
-mentor opening the public URL sees v2.1.
+mentor opening the public URL sees v2.3.
 
 ---
 
@@ -47,7 +48,7 @@ Target: `https://vsalonoy.github.io/mo-ss033-terminal-assessment/`
 The repository exists, Pages is switched on, and the workflow at
 `.github/workflows/deploy.yml` has already published once. The first-time setup is done.
 
-**Publishing the v2.3 release candidate:**
+**Publishing a new version:**
 
 1. Check what you are about to publish: `git log origin/main..main --oneline` lists the
    commits that are local only, and `git status` should be clean.
@@ -92,19 +93,19 @@ information.
 
 ```
 src/data/research.ts     All research content, citations and the 17 references.
-                         Both modes read from this one file. Edit content here.
-src/hooks/               Reduced-motion detection, mode state, scroll tracking, keyboard nav.
+                         Every section reads from this one file. Edit content here.
+src/hooks/               Reduced-motion detection, scroll tracking, fragment and citation navigation.
 src/components/
   primitives.tsx         Section shell, scroll reveal, animated counter, citation link, caveat box.
   ParticleField.tsx      Canvas node network in the opening. One still frame under reduced motion.
   Hero.tsx               Cinematic opening and the four headline figures.
-  Chrome.tsx             Top bar, section rail, presentation controls, footer.
+  Chrome.tsx             Top bar, Sections menu, section rail, footer.
   SectionsAE.tsx         Sections A to E.
   SectionsFL.tsx         Sections F to L.
   Evidence.tsx           Evidence cards, and the implementation responsibility map in F.
   viz.tsx                The hand-built SVG charts. No charting library.
   Ambient.tsx            Background field, blooms and the scroll progress line.
-src/App.tsx              Mode state, and the twelve sections both modes render.
+src/App.tsx              The twelve sections, rendered in order as one document.
 ```
 
 ### Editing the research
@@ -113,16 +114,17 @@ Everything substantive lives in `src/data/research.ts`. To change a figure, a ci
 reference, edit it there once and it updates everywhere it appears. To add a reference, add an
 entry to `REFERENCES` with a new key, then cite it with `<Cite keys={['yourkey']} />`.
 
-**Do not copy research text into a component.** The two modes share this file deliberately, so
-that nothing can drift out of step between them.
+**Do not copy research text into a component.** Figures that appear in more than one section
+read from the same entry deliberately, so that nothing can drift out of step.
 
-### The two modes
+### Navigation
 
-Explore Mode scrolls through all twelve sections. Presentation Mode shows one at a time with
-Prev and Next. Both render the same twelve components from `App.tsx`; only the layout differs.
-
-Keyboard: arrow keys or space to move, `Home` and `End` to jump, `P` to switch modes,
-`Esc` to leave Presentation Mode.
+The site is one scrolling research document of twelve sections. On wide screens the letters in
+the top bar jump to a section; below 1280px the Sections menu does the same, and a rail on the
+left tracks progress. Citations are APA 7 parenthetical links to the reference list in section L.
+Following one adds a history entry, so the browser's Back button returns to the citation, and the
+reference entry offers a "Back to the citation" button. A link straight to a reference, such as
+`#ref-ra11962`, scrolls to that entry and focuses it on first load.
 
 ### Accessibility
 
@@ -131,7 +133,7 @@ the particle field draws a single still frame. Contrast is computed with alpha c
 the actual background rather than eyeballed. Across 859 measured text nodes with every
 disclosure open, none falls below its WCAG AA threshold; the lowest is 4.56:1, on the stage
 ordinals in section F, and the de-emphasised column in the section D matrix sits at 4.64:1. Every control is keyboard reachable with a visible focus outline, and citations resolve to
-their reference entry in both modes. Fonts are bundled rather than fetched from Google, so the
+their reference entry. Fonts are bundled rather than fetched from Google, so the
 site makes no outbound request.
 
 If you change a colour, re-check contrast before submitting.
