@@ -32,7 +32,7 @@ export function Intro() {
               ['Arrangement', `${PROJECT.arrangement}, Section ${PROJECT.section}`],
             ].map(([k, v]) => (
               <div key={k} className="border-l border-line pl-5">
-                <dt className="font-display text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-cyan-300">{k}</dt>
+                <dt className="mlabel text-cyan-300">{k}</dt>
                 <dd className="mt-1.5 text-[0.94rem] leading-relaxed text-sand/90">{v}</dd>
               </div>
             ))}
@@ -44,7 +44,7 @@ export function Intro() {
           <div className="eyebrow">Who this is written for</div>
           <div className="mt-5 grid lg:grid-cols-2 gap-x-10 gap-y-6">
             <div className="lg:col-span-2 card p-6 border-cyan-500/25">
-              <div className="font-display text-[0.66rem] font-semibold uppercase tracking-[0.13em] text-cyan-300">
+              <div className="mlabel text-cyan-300">
                 Intended audience
               </div>
               <p className="mt-2 text-[1rem] leading-relaxed text-sand">{AUDIENCE.who}</p>
@@ -54,12 +54,12 @@ export function Intro() {
               ['What this adds', AUDIENCE.needed],
             ] as const).map(([k, v]) => (
               <div key={k} className="border-l border-line pl-5">
-                <div className="font-display text-[0.66rem] font-semibold uppercase tracking-[0.13em] text-mute">{k}</div>
+                <div className="mlabel text-mute">{k}</div>
                 <p className="mt-2 text-[0.9rem] leading-relaxed text-sand/88">{v}</p>
               </div>
             ))}
             <div className="lg:col-span-2 border-l border-cyan-500/50 pl-5">
-              <div className="font-display text-[0.66rem] font-semibold uppercase tracking-[0.13em] text-cyan-300">
+              <div className="mlabel text-cyan-300">
                 What they should be able to do after reading
               </div>
               <p className="mt-2 text-[0.9rem] leading-relaxed text-sand/88">
@@ -153,7 +153,7 @@ export function Challenge() {
           <div className="mt-6 space-y-3">
             {EXPOSURE_NOTES.map(n => (
               <div key={n.k} className="border-l border-line pl-5">
-                <div className="font-display text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-cyan-300">{n.k}</div>
+                <div className="mlabel text-cyan-300">{n.k}</div>
                 <p className="mt-1 text-[0.88rem] leading-relaxed text-sand/88">{n.v} <Cite keys={n.ref} /></p>
               </div>
             ))}
@@ -178,13 +178,13 @@ export function Stakeholders() {
           const isOpen = open === s.name;
           return (
             <Reveal key={s.name} delay={i * 0.04}>
-              <div className={`card overflow-hidden transition-colors ${isOpen ? 'border-cyan-500/30' : ''}`}>
+              <div className={`card card-toggle overflow-hidden ${isOpen ? 'border-cyan-500/30' : ''}`}>
                 <button
                   onClick={() => setOpen(isOpen ? null : s.name)}
                   aria-expanded={isOpen}
                   className="w-full text-left px-6 py-5 flex items-start gap-4"
                 >
-                  <span className="font-sans text-[0.72rem] font-semibold tabular-nums text-cyan-300/80 pt-1 w-6 shrink-0">
+                  <span className="font-mono text-[0.72rem] font-medium text-cyan-300/80 pt-1 w-6 shrink-0">
                     {String(i + 1).padStart(2, '0')}
                   </span>
                   <span className="min-w-0 flex-1">
@@ -204,7 +204,7 @@ export function Stakeholders() {
                         {[['How they are affected', s.affected], ['What they want', s.interest],
                           ['What they would contribute', s.contribution]].map(([k, v]) => (
                           <div key={k}>
-                            <dt className="font-display text-[0.66rem] font-semibold uppercase tracking-[0.13em] text-mute">{k}</dt>
+                            <dt className="mlabel text-mute">{k}</dt>
                             <dd className="mt-1.5 text-[0.86rem] leading-relaxed text-sand/88">{v}</dd>
                           </div>
                         ))}
@@ -276,11 +276,11 @@ export function Solutions() {
               onClick={() => setActive(s.id)} aria-pressed={active === s.id}
               /* flex-col stops the browser vertically centring button content,
                  which would otherwise start each card's text at a different height. */
-              className={`w-full h-full text-left card p-5 flex flex-col items-stretch transition-all ${
-                active === s.id ? 'border-cyan-500/50 bg-cyan-500/[0.05]' : 'hover:border-line/80'}`}
+              className={`w-full h-full text-left card card-action p-5 flex flex-col items-stretch ${
+                active === s.id ? 'border-cyan-500/50 bg-cyan-500/[0.05]' : ''}`}
             >
               <div className="flex items-baseline justify-between gap-2">
-                <span className="font-display text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-mute">{s.where}</span>
+                <span className="mlabel text-mute">{s.where}</span>
                 <span className={`font-display text-[1.35rem] font-extrabold leading-none ${
                   s.rank === 1 ? 'text-cyan-300' : 'text-mute/80'}`}>#{s.rank}</span>
               </div>
@@ -340,7 +340,7 @@ export function Solutions() {
                   return (
                     <div key={c.key} className="border-l border-line pl-5 py-1">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="font-display text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-mute">{c.label}</span>
+                        <span className="mlabel text-mute">{c.label}</span>
                         <Chip tone={ratingTone(cell.r)}>{cell.r}</Chip>
                       </div>
                       <p className="mt-1.5 text-[0.86rem] leading-relaxed text-sand/85">{cell.why}</p>
@@ -393,14 +393,14 @@ export function Solutions() {
               </caption>
               <thead>
                 <tr className="border-b border-line">
-                  <th scope="col" className="px-5 py-3.5 font-display text-[0.66rem] font-semibold uppercase tracking-[0.13em] text-mute">Solution</th>
+                  <th scope="col" className="px-5 py-3.5 mlabel text-mute">Solution</th>
                   {CRITERIA.map(c => {
                     const dim = focusKey !== null && focusKey !== c.key;
                     return (
                       <th key={c.key} scope="col"
                         /* The de-emphasised column still has to clear WCAG AA. text-mute/45
                            measured 2.45:1 against the card; /75 measures 4.64:1. */
-                        className={`px-5 py-3.5 font-display text-[0.66rem] font-semibold uppercase tracking-[0.13em] transition-colors ${
+                        className={`px-5 py-3.5 mlabel transition-colors ${
                           focusKey === c.key ? 'text-cyan-200' : dim ? 'text-mute/75' : 'text-mute'}`}>
                         {c.label}
                       </th>
@@ -461,7 +461,7 @@ export function Solutions() {
                 <div className="flex flex-wrap items-center gap-2.5">
                   <span className="t-label">{activeCell.solution.short}</span>
                   <span className="text-mute/60" aria-hidden>/</span>
-                  <span className="font-display text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-mute">{activeCell.label}</span>
+                  <span className="mlabel text-mute">{activeCell.label}</span>
                   <Chip tone={ratingTone(activeCell.cell.r)}>{activeCell.cell.r}</Chip>
                 </div>
                 <p className="t-small mt-2.5 max-w-reading">{activeCell.cell.why}</p>
@@ -490,7 +490,7 @@ export function Ranking() {
               s.rank === 1 ? 'text-cyan-300' : 'text-mute/80'}`}>{s.rank}</span>
             <div className="min-w-0">
               <h3 className="text-[1.06rem] text-sand">{s.name}</h3>
-              <div className="mt-1 font-display text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-mute">{s.where}</div>
+              <div className="mt-1 mlabel text-mute">{s.where}</div>
               <p className="mt-3 text-[0.92rem] leading-relaxed text-sand/88">{s.rankWhy}</p>
               <div className="mt-3"><Cite keys={s.ref} /></div>
             </div>

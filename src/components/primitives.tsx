@@ -173,7 +173,7 @@ export function Disclosure({ summary, hint, children, defaultOpen = false }:
   const [open, setOpen] = useState(defaultOpen);
   const panelId = useId();
   return (
-    <div className={`mt-6 card ${open ? 'border-cyan-500/30' : ''}`}>
+    <div className={`mt-6 card card-toggle ${open ? 'border-cyan-500/30' : ''}`}>
       <button
         type="button"
         onClick={() => setOpen(o => !o)}
@@ -187,7 +187,7 @@ export function Disclosure({ summary, hint, children, defaultOpen = false }:
           <span className="block font-display text-[0.98rem] font-bold leading-snug text-sand">{summary}</span>
           {hint && <span className="mt-0.5 block text-[0.8rem] leading-snug text-mute">{hint}</span>}
         </span>
-        <span className="shrink-0 font-display text-[0.66rem] font-semibold uppercase tracking-[0.13em] text-mute">
+        <span className="shrink-0 mlabel text-mute">
           {open ? 'Hide' : 'Show'}
         </span>
       </button>

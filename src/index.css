@@ -1,6 +1,32 @@
-@import '@fontsource-variable/plus-jakarta-sans/wght.css';
-@import '@fontsource-variable/plus-jakarta-sans/wght-italic.css';
+@import '@fontsource-variable/space-grotesk/wght.css';
 @import '@fontsource-variable/inter/wght.css';
+/* One weight. Plex Mono only sets small uppercase labels. */
+@import '@fontsource/ibm-plex-mono/500.css';
+
+/* Arial resized to Space Grotesk's measurements, so text set before the web font
+   arrives already occupies the same space and nothing moves when it swaps in.
+   Without this the hero headline rewrapped on swap and load CLS reached 0.13.
+   Space Grotesk barely widens with weight but Arial does, so the regular and bold
+   ranges are matched separately. Bold needs Arial's real bold face because
+   synthetic bold is switched off. */
+@font-face {
+  font-family: 'Space Grotesk Fallback';
+  src: local('Arial'), local('ArialMT');
+  font-weight: 300 500;
+  size-adjust: 108.3%;
+  ascent-override: 90.5%;
+  descent-override: 26.8%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: 'Space Grotesk Fallback';
+  src: local('Arial Bold'), local('Arial-BoldMT');
+  font-weight: 600 800;
+  size-adjust: 101.2%;
+  ascent-override: 96.8%;
+  descent-override: 28.7%;
+  line-gap-override: 0%;
+}
 
 @tailwind base;
 @tailwind components;
@@ -57,11 +83,15 @@
   .t-small { @apply font-sans text-small text-sand/85; }
   .t-micro { @apply font-sans text-micro text-mute; }
   .t-stat  { @apply font-display text-stat stat-figure; }
-  .t-label { @apply font-display text-label uppercase text-cyan-300; }
+  .t-label { @apply font-mono text-label font-medium tracking-[0.08em] uppercase text-cyan-300; }
   .prose-r { @apply max-w-reading text-body text-sand/85; }
 
+  /* Small uppercase metadata inside cards, tables and panels. Colour is set where used.
+     Monospace letters are already evenly spaced, so it needs less tracking than a sans. */
+  .mlabel { @apply font-mono text-[0.66rem] font-medium uppercase tracking-[0.08em]; }
+
   .eyebrow {
-    @apply font-display text-label uppercase text-cyan-300 flex items-center gap-2.5;
+    @apply font-mono text-label font-medium tracking-[0.08em] uppercase text-cyan-300 flex items-center gap-2.5;
   }
   .eyebrow::before {
     content: '';
@@ -74,10 +104,37 @@
        canvas behind them repaints every frame, so a backdrop blur on each one
        forces the whole stack to re-sample and re-blur on every scroll frame.
        A slightly more opaque fill gives the same separation for free. */
-    @apply rounded-xl border border-line bg-ink-700/80;
-    transition: border-color .32s cubic-bezier(.22,.61,.36,1), background-color .32s cubic-bezier(.22,.61,.36,1), transform .32s cubic-bezier(.22,.61,.36,1);
+    @apply rounded-xl border border-edge bg-ink-700/80;
+    /* A faint lit top edge and a soft lift off the page. Both are static, so they
+       cost nothing per frame. */
+    background-image: linear-gradient(180deg, rgba(255,255,255,0.022), rgba(255,255,255,0) 42%);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.045), 0 12px 32px -20px rgba(0,0,0,0.7);
+    transition-property: border-color, background-color, transform, box-shadow;
+    transition-duration: .3s;
+    transition-timing-function: theme('transitionTimingFunction.soft');
   }
-  .card-hover:hover { @apply border-cyan-500/35 bg-ink-600/60; }
+
+  /* Hover treatment, reserved for cards that do something when clicked.
+     A card that is a button lifts; an accordion card only lights its edge, because
+     lifting a panel that may be hundreds of pixels tall reads as the page moving.
+     Transform and box-shadow do not affect layout, so nothing around it shifts.
+     Touch screens get none of it: a tap would leave the hover state stuck on. */
+  @media (hover: hover) {
+    .card-action:hover {
+      @apply border-accent-bright/30;
+      transform: translateY(-2px);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 14px 32px -18px rgba(52,209,212,0.32);
+    }
+    .card-toggle:has(> button:hover) {
+      @apply border-accent-bright/30;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 14px 32px -20px rgba(52,209,212,0.24);
+    }
+  }
+  /* Keyboard focus gets the same edge, alongside the global focus outline. */
+  .card-action:focus-visible, .card-toggle:has(> button:focus-visible) { @apply border-accent-bright/45; }
+  @media (prefers-reduced-motion: reduce) {
+    .card-action:hover { transform: none; }
+  }
 
   .chip {
     @apply inline-flex items-center rounded-full border px-2.5 py-0.5 font-display text-[0.68rem] font-semibold tracking-wide;
@@ -91,7 +148,7 @@
   .btn {
     @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5
            font-display text-[0.86rem] font-semibold tracking-tight
-           transition-all duration-200 ease-out disabled:opacity-40 disabled:pointer-events-none;
+           transition-all duration-200 ease-soft disabled:opacity-40 disabled:pointer-events-none;
   }
   .btn-p { @apply bg-cyan-400 text-ink-950 hover:bg-cyan-300 hover:shadow-[0_0_28px_-6px_rgba(34,211,238,0.55)]; }
   .btn-g { @apply border border-line text-sand hover:border-cyan-500/45 hover:text-cyan-200 hover:bg-cyan-500/[0.06]; }

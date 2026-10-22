@@ -226,7 +226,7 @@ export function PresentationControls() {
       </div>
       <div className="wrap flex items-center gap-3 py-3">
         <div className="min-w-0">
-          <div className="font-display text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-cyan-300">
+          <div className="mlabel text-cyan-300">
             {cur.letter} &nbsp;/&nbsp; {index + 1} of {SECTIONS.length}
           </div>
           <div className="truncate text-[0.9rem] text-sand">{cur.label}</div>
@@ -252,7 +252,7 @@ export function Footer() {
   return (
     <footer className="border-t border-line py-12">
       <div className="wrap text-[0.78rem] leading-relaxed text-mute/80">
-        <p className="font-display text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-mute">{PROJECT.course}</p>
+        <p className="mlabel text-mute">{PROJECT.course}</p>
         <p className="mt-2">
           {PROJECT.assessment} &nbsp;&middot;&nbsp; {PROJECT.student} &nbsp;&middot;&nbsp;
           Section {PROJECT.section} &nbsp;&middot;&nbsp; Mentor {PROJECT.mentor} &nbsp;&middot;&nbsp;

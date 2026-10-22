@@ -98,7 +98,7 @@ export function Proposal() {
           <dl className="mt-5 space-y-5">
             {PROPOSAL.adaptation.map(a => (
               <div key={a.k} className="grid sm:grid-cols-[14rem_minmax(0,1fr)] gap-x-6 gap-y-1.5 border-t border-line pt-5">
-                <dt className="font-display text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-cyan-300">{a.k}</dt>
+                <dt className="mlabel text-cyan-300">{a.k}</dt>
                 <dd className="text-[0.92rem] leading-relaxed text-sand/92">
                   {a.v} <Cite keys={a.ref} />
                 </dd>
@@ -238,8 +238,8 @@ export function Journey() {
                     type="button"
                     onClick={() => pickStage(st)}
                     aria-pressed={on}
-                    className={`w-full h-full text-left card px-4 py-3.5 transition-colors ${
-                      on ? 'border-cyan-500/50 bg-cyan-500/[0.07]' : 'hover:border-line/80'}`}
+                    className={`w-full h-full text-left card card-action px-4 py-3.5 ${
+                      on ? 'border-cyan-500/50 bg-cyan-500/[0.07]' : ''}`}
                   >
                     <span className={`block font-display text-[0.88rem] font-bold leading-snug ${
                       on ? 'text-cyan-200' : 'text-sand'}`}>{st.stage}</span>
@@ -376,13 +376,13 @@ export function Smart() {
               <div className={`card p-6 flex flex-col transition-colors ${isOpen ? 'border-cyan-500/35' : ''}`}>
                 <div className="flex items-start justify-between gap-3">
                   <h3 className="text-[1rem] leading-snug text-sand">{m.name}</h3>
-                  <span className="font-sans text-[0.68rem] font-medium tabular-nums text-mute/80 pt-1 shrink-0">
+                  <span className="font-mono text-[0.68rem] font-medium text-mute/80 pt-1 shrink-0">
                     M{i + 1}
                   </span>
                 </div>
 
                 <div className="mt-4 border-l-2 border-l-cyan-500/50 pl-4">
-                  <div className="font-display text-[0.66rem] font-semibold uppercase tracking-[0.13em] text-mute">Proposed target</div>
+                  <div className="mlabel text-mute">Proposed target</div>
                   <div className="mt-1 font-display text-[1.08rem] font-bold leading-snug text-cyan-300">{m.target}</div>
                 </div>
 
@@ -391,7 +391,7 @@ export function Smart() {
                 <button
                   onClick={() => setOpen(isOpen ? null : m.id)} aria-expanded={isOpen}
                   className="mt-4 self-start inline-flex min-h-[26px] items-center gap-1.5 rounded
-                             font-display text-[0.68rem] font-semibold uppercase tracking-[0.14em]
+                             mlabel
                              text-cyan-300 hover:text-cyan-200"
                 >
                   <span aria-hidden className={`inline-block transition-transform ${isOpen ? 'rotate-45' : ''}`}>+</span>
@@ -405,7 +405,7 @@ export function Smart() {
                       ['Data source', m.source], ['Time point', m.timeframe],
                       ['Responsible', m.owner], ['What it cannot tell you', m.assumption]].map(([k, v]) => (
                       <div key={k}>
-                        <dt className="font-display text-[0.65rem] font-semibold uppercase tracking-[0.13em] text-mute">{k}</dt>
+                        <dt className="mlabel text-mute">{k}</dt>
                         <dd className={`mt-0.5 text-[0.82rem] leading-relaxed ${
                           k === 'What it cannot tell you' ? 'text-amber/90'
                           : k === 'Baseline' ? 'text-sand/75' : 'text-sand/85'}`}>{v}</dd>
@@ -464,7 +464,7 @@ export function Risks() {
           <thead>
             <tr className="border-b border-line">
               {['Area', 'Risk', 'Why it matters', 'Proposed mitigation'].map(h => (
-                <th key={h} scope="col" className="px-5 py-3.5 font-display text-[0.66rem] font-semibold uppercase tracking-[0.13em] text-mute">{h}</th>
+                <th key={h} scope="col" className="px-5 py-3.5 mlabel text-mute">{h}</th>
               ))}
             </tr>
           </thead>
@@ -552,7 +552,7 @@ export function References() {
         {REFERENCES.map((r, i) => (
           <li key={r.key} id={`ref-${r.key}`} tabIndex={-1}
             className="scroll-mt-28 grid grid-cols-[2.5rem_minmax(0,1fr)] gap-x-4 focus:outline-none focus-visible:outline-2 focus-visible:outline-cyan-400">
-            <span className="font-sans text-[0.72rem] font-medium tabular-nums text-mute/80 pt-1">{String(i + 1).padStart(2, '0')}</span>
+            <span className="font-mono text-[0.72rem] font-medium text-mute/80 pt-1">{String(i + 1).padStart(2, '0')}</span>
             <div className="prose-r min-w-0">
               <p className="text-[0.92rem] leading-relaxed text-sand/92">
                 {r.author} ({r.year}). <em className="text-sand">{r.title}</em>

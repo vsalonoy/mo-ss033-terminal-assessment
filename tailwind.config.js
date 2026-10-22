@@ -16,12 +16,20 @@ export default {
         /* Amber flags something proposed rather than measured. Rose flags a hard limit. */
         amber: '#E6A94C',
         rose: '#E07A6B',
+        /* Interaction accent: hover and focus emphasis on cards that do something.
+           Kept apart from cyan so chart and status colours keep their meaning. */
+        accent: { DEFAULT: '#00A3A6', bright: '#34D1D4' },
+        /* Card edge. Neutral white rather than the blue-grey of `line`, so a card
+           reads as a raised surface and not as another divider. */
+        edge: 'rgba(255,255,255,0.10)',
       },
       fontFamily: {
-        /* Two families. Plus Jakarta Sans carries display and interface, Inter carries
-           reading and data, where its larger x-height and tabular figures do more work. */
-        display: ['"Plus Jakarta Sans Variable"', 'Plus Jakarta Sans', 'system-ui', 'sans-serif'],
+        /* Space Grotesk carries headings, figures and interface. Inter carries reading
+           and data, where its larger x-height and tabular figures do more work. Plex Mono
+           is for small uppercase labels only, never for anything read as a sentence. */
+        display: ['"Space Grotesk Variable"', '"Space Grotesk Fallback"', 'system-ui', 'sans-serif'],
         sans: ['"Inter Variable"', 'Inter', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
+        mono: ['"IBM Plex Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
       },
       fontSize: {
         /* Fluid scale. Upper bounds are deliberately restrained so headings do not
@@ -42,6 +50,9 @@ export default {
       transitionTimingFunction: {
         out: 'cubic-bezier(0.22,0.61,0.36,1)',
         expo: 'cubic-bezier(0.16,1,0.3,1)',
+        /* Hover and state changes in CSS. Scroll reveals, counters and the journey
+           keep their own curves in motion/react. */
+        soft: 'cubic-bezier(0.2,0.7,0.2,1)',
       },
       keyframes: {
         drift: { '0%,100%': { transform: 'translate3d(0,0,0)' }, '50%': { transform: 'translate3d(0,-14px,0)' } },

@@ -65,8 +65,10 @@ export default function Hero() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.85, delay: d(0.3 + i * 0.1), ease: [0.16, 1, 0.3, 1] }}
                 >
+                  {/* Colour carries the emphasis. Space Grotesk has no italic, and a
+                      synthesised slant is switched off site-wide. */}
                   {word === 'changing.'
-                    ? <span className="text-cyan-300 italic">{word}</span>
+                    ? <span className="text-cyan-300">{word}</span>
                     : word}
                 </motion.span>
                 {i < WORDS.length - 1 ? ' ' : ''}

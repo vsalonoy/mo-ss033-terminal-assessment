@@ -18,7 +18,7 @@ function Card({ e }: { e: Evidence }) {
   const sgOnly = /^Singapore/.test(e.scope);
 
   return (
-    <div className={`card transition-colors ${open ? 'border-cyan-500/35' : ''}`}>
+    <div className={`card card-toggle ${open ? 'border-cyan-500/35' : ''}`}>
       <button
         type="button"
         onClick={() => setOpen(o => !o)}
@@ -46,21 +46,21 @@ function Card({ e }: { e: Evidence }) {
           >
             <dl className="px-5 pb-5 pt-1 space-y-3 border-t border-line/60">
               <div>
-                <dt className="font-display text-[0.64rem] font-semibold uppercase tracking-[0.13em] text-mute">What the source says</dt>
+                <dt className="mlabel text-mute">What the source says</dt>
                 <dd className="mt-1 text-[0.86rem] leading-relaxed text-sand/90">{e.finding}</dd>
               </div>
               <div className="grid sm:grid-cols-2 gap-3">
                 <div>
-                  <dt className="font-display text-[0.64rem] font-semibold uppercase tracking-[0.13em] text-mute">Published by</dt>
+                  <dt className="mlabel text-mute">Published by</dt>
                   <dd className="mt-1 text-[0.84rem] leading-snug text-sand/90">{r.author}</dd>
                 </div>
                 <div>
-                  <dt className="font-display text-[0.64rem] font-semibold uppercase tracking-[0.13em] text-mute">Date</dt>
+                  <dt className="mlabel text-mute">Date</dt>
                   <dd className="mt-1 text-[0.84rem] leading-snug text-sand/90">{r.year}</dd>
                 </div>
               </div>
               <div>
-                <dt className="font-display text-[0.64rem] font-semibold uppercase tracking-[0.13em] text-mute">Source</dt>
+                <dt className="mlabel text-mute">Source</dt>
                 <dd className="mt-1">
                   <a href={r.url} target="_blank" rel="noopener noreferrer"
                     className="text-[0.84rem] leading-snug text-cyan-300 underline decoration-cyan-500/40 underline-offset-2 [overflow-wrap:anywhere] hover:decoration-cyan-300">
@@ -180,7 +180,7 @@ export function ImplementationMap({ heading = true }: { heading?: boolean } = {}
 
             <div className="mt-5 grid md:grid-cols-2 gap-6">
               <div className="border-l-2 border-l-cyan-500/60 pl-4">
-                <div className="font-display text-[0.66rem] font-semibold uppercase tracking-[0.13em] text-cyan-300">
+                <div className="mlabel text-cyan-300">
                   Already does this, by law or by programme
                 </div>
                 <p className="mt-2 text-[0.88rem] leading-relaxed text-sand/90">
@@ -188,7 +188,7 @@ export function ImplementationMap({ heading = true }: { heading?: boolean } = {}
                 </p>
               </div>
               <div className="border-l-2 border-l-amber/60 pl-4">
-                <div className="font-display text-[0.66rem] font-semibold uppercase tracking-[0.13em] text-amber">
+                <div className="mlabel text-amber">
                   Would be asked to do this, proposed
                 </div>
                 <p className="mt-2 text-[0.88rem] leading-relaxed text-sand/90">{actor.proposed}</p>
