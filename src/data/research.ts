@@ -166,11 +166,13 @@ export const PROJECT = {
   arrangement: 'Working individually',
   driver: 'Technology',
   title: 'Workplace Automation and Filipino Workers',
+  /** The formal title's second half. Title and titleSub together are the research title. */
+  titleSub: 'Evaluating Reskilling, Job Redesign, and Career Conversion',
   subtitle: 'Evaluating reskilling, job redesign and career conversion, and proposing a Philippine place-and-train track',
   headline: 'The future of Filipino work is changing.',
   version: 'v2.4 draft',
-  draftTarget: '24 October 2026',
-  finalDeadline: '7 November 2026, 11:59 PM',
+  draftDue: '24 October 2026',
+  finalDue: '7 November 2026',
   focusIssue:
     'Workplace automation and Filipino workers: how automation is changing jobs and skill requirements, and whether workers are being supported through that change.',
   position:

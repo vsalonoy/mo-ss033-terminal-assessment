@@ -199,8 +199,8 @@ export function Footer() {
           {PROJECT.arrangement}
         </p>
         <p className="mt-2">
-          {PROJECT.version} &nbsp;&middot;&nbsp; Internal completion target {PROJECT.draftTarget}
-          &nbsp;&middot;&nbsp; Submission deadline {PROJECT.finalDeadline}
+          {PROJECT.version} &nbsp;&middot;&nbsp; Draft due {PROJECT.draftDue}
+          &nbsp;&middot;&nbsp; Final submission due {PROJECT.finalDue}
         </p>
         <p className="mt-4 max-w-reading">
           Student coursework. The Philippine career conversion track described here is a proposal

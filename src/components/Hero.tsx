@@ -54,15 +54,30 @@ export default function Hero() {
             <div className="eyebrow">{PROJECT.course} &nbsp;/&nbsp; {PROJECT.assessment}</div>
           </motion.div>
 
-          <h1 className="mt-6 font-display text-[clamp(2.6rem,8vw,6rem)] leading-[0.98] tracking-[-0.02em] text-sand">
-            {/* A real space between words, so the headline reads as a sentence to a screen reader. */}
+          {/* The formal research title is the page's h1. The creative line that used
+              to hold this place follows it as a tagline. */}
+          <motion.h1
+            className="mt-6 font-display text-sand"
+            initial={reduced ? false : { opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: d(0.2), ease: [0.16, 1, 0.3, 1] }}
+          >
+            <span className="block text-[clamp(2rem,5.2vw,4.4rem)] font-medium leading-[1.04] tracking-[-0.025em]">
+              {PROJECT.title}:
+            </span>{' '}
+            <span className="mt-3 block text-[clamp(1.15rem,2.4vw,1.95rem)] leading-snug tracking-[-0.01em] text-sand/80">
+              {PROJECT.titleSub}
+            </span>
+          </motion.h1>
+
+          <p className="mt-7 font-display text-[clamp(1.45rem,3.4vw,2.7rem)] leading-[1.08] tracking-[-0.02em] text-sand">
+            {/* A real space between words, so the tagline reads as a sentence to a screen reader. */}
             {WORDS.map((word, i) => (
               <Fragment key={i}>
                 <motion.span
                   className="inline-block"
                   initial={reduced ? false : { opacity: 0, y: '0.42em' }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.85, delay: d(0.3 + i * 0.1), ease: [0.16, 1, 0.3, 1] }}
+                  transition={{ duration: 0.85, delay: d(0.45 + i * 0.1), ease: [0.16, 1, 0.3, 1] }}
                 >
                   {/* Colour carries the emphasis. Space Grotesk has no italic, and a
                       synthesised slant is switched off site-wide. */}
@@ -73,7 +88,7 @@ export default function Hero() {
                 {i < WORDS.length - 1 ? ' ' : ''}
               </Fragment>
             ))}
-          </h1>
+          </p>
 
           <motion.p
             className="mt-8 max-w-[58ch] text-[1.05rem] sm:text-[1.15rem] leading-relaxed text-mute"

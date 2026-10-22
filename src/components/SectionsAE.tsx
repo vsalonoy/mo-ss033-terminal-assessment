@@ -27,7 +27,7 @@ export function Intro() {
           <dl className="space-y-5">
             {[
               ['Globalization driver', PROJECT.driver],
-              ['Working title', PROJECT.title],
+              ['Title', `${PROJECT.title}: ${PROJECT.titleSub}`],
               ['Scope', PROJECT.subtitle],
               ['Arrangement', `${PROJECT.arrangement}, Section ${PROJECT.section}`],
             ].map(([k, v]) => (
