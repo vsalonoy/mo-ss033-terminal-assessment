@@ -8,7 +8,7 @@ export type RefKey =
   | 'adb2020' | 'adb2021' | 'dagooc2026' | 'dole' | 'huynh2026'
   | 'ilo2026a' | 'ilo2026b' | 'khan2026' | 'malaya2025' | 'moe2025'
   | 'mti2025' | 'psa2026' | 'ra10869' | 'ra11962' | 'ra12063'
-  | 'tesda2025' | 'wsg';
+  | 'tesda2025' | 'wsg' | 'momwsg2026';
 
 /** A sentence and the sources it draws on. Rendered with its citation before the full stop. */
 export interface Sentence { t: string; refs?: RefKey[] }
@@ -56,6 +56,9 @@ export const REFERENCES: Reference[] = [
   { key:'moe2025', author:'Ministry of Education Singapore', year:'2025, November 5',
     title:'Considerations and efforts taken to increase usage of $500 SkillsFuture Credits before its expiry end-2025 [Parliamentary reply]',
     url:'https://www.moe.gov.sg/news/parliamentary-replies/20251105-considerations-and-efforts-taken-to-increase-usage-of-$500-skillsfuture-credits-before-its-expiry-end-2025' },
+  { key:'momwsg2026', author:'Ministry of Manpower & Workforce Singapore', year:'2026, March 3',
+    title:'Factsheet on Enterprise Workforce Transformation Package (EWTP) [Fact sheet]',
+    url:'https://www.mom.gov.sg/-/media/mom/documents/press-releases/2026/factsheet-on-enterprise-workforce-transformation-package-03032026.pdf' },
   { key:'mti2025', author:'Ministry of Trade and Industry Singapore', year:'2025, February 14',
     title:"Impact evaluation of Workforce Singapore's place-and-train Career Conversion Programme",
     container:'Economic Survey of Singapore', part:true,
@@ -78,7 +81,7 @@ export const REFERENCES: Reference[] = [
     url:'https://tesda.gov.ph/Media/NewsDetail/20405' },
   { key:'wsg', author:'Workforce Singapore', year:'n.d.',
     title:'Support for Job Redesign under Productivity Solutions Grant (PSG-JR)',
-    url:'https://www.wsg.gov.sg/productivity-solutions-grant-job-redesign.html' },
+    url:'http://web.archive.org/web/20251222102921/https://www.wsg.gov.sg/home/employers-industry-partners/workforce-development-job-redesign/support-for-job-redesign-under-productivity-solutions-grant' },
 ];
 
 export const refMap = Object.fromEntries(REFERENCES.map(r => [r.key, r])) as Record<RefKey, Reference>;
@@ -147,7 +150,7 @@ export const EVIDENCE: Evidence[] = [
     finding:'Section 20 gives an additional deduction from taxable income of 50 percent of actual training expenses through 31 December 2027, rising to 75 percent from 1 January 2028, capped at the lower of 5 percent of total direct labour expenses or 25 million pesos a year.',
     scope:'Philippines, statutory', ref:'ra12063' },
   { id:'e10', section:'proposal',
-    claim:'740 million pesos is committed to reskilling 340,000 IT-BPM workers',
+    claim:'740 million pesos is committed to reskilling up to 340,000 participants, including near-hire individuals and college students',
     finding:'Government-approved funding over three years in digital and AI skills, set to start in the second half of 2025. No outcome data had been published at the time of writing.',
     scope:'Philippines, IT-BPM sector', ref:'malaya2025' },
   { id:'e11', section:'proposal',
@@ -302,10 +305,10 @@ export interface Solution {
 
 export const SOLUTIONS: Solution[] = [
   { id:'s1', rank:2, name:'Government-funded reskilling and upskilling', short:'National reskilling', where:'Philippines',
-    what:'740 million pesos to train 340,000 IT-BPM workers over three years in digital and AI skills.',
+    what:'740 million pesos to train up to 340,000 participants over three years in digital and AI skills, including near-hire individuals and college students.',
     who:'National government funds it, the industry association helps steer it.',
     status:'Approved and funded, set to start in the second half of 2025. Not a programme with published results.',
-    targetPopulation:'Workers already employed in IT-BPM, with the programme also open to college students close to being hired. 340,000 places over three years.',
+    targetPopulation:'Workers already employed in IT-BPM, with the programme also open to near-hire individuals and college students. Up to 340,000 places over three years.',
     detail:[
       'IBPAP aligns programme strategies with TESDA and DICT.',
       'The target group includes people close to being hired as well as college students, so it covers both current and incoming workers.',
@@ -314,7 +317,7 @@ export const SOLUTIONS: Solution[] = [
     ],
     criteria:{
       sustainability:{r:'Moderate', why:'RA 11962 gives a standing legal basis, but the 740 million peso commitment is a three-year amount rather than a permanent facility.'},
-      impact:{r:'Moderate', why:'Targets 340,000 IT-BPM workers while ILO exposure covers 12.7 million across all sectors. The two figures describe different populations and are not a coverage rate.'},
+      impact:{r:'Moderate', why:'Targets up to 340,000 participants, including near-hires and students, while ILO exposure covers 12.7 million across all sectors. The two figures describe different populations and are not a coverage rate.'},
       feasibility:{r:'High', why:'Already funded and approved to start, with Philippine agencies and a legal mandate in place.'},
       effectiveness:{r:'Not shown', why:'No published outcome results among the sources I reviewed, because it was only set to start in the second half of 2025.'},
     },
@@ -324,21 +327,22 @@ export const SOLUTIONS: Solution[] = [
   { id:'s2', rank:4, name:'Employer-led job redesign', short:'Job redesign', where:'Singapore',
     what:'Grants for enterprises to work with pre-approved consultants on redesigning work processes, tasks and responsibilities.',
     who:'The employer decides, government subsidises the consultancy.',
-    status:'The Workforce Singapore page states the grant ends on 31 December 2025. I found no successor scheme.',
+    status:'The Workforce Singapore page stated that the grant would end on 31 December 2025. From March 2026 it was replaced by the SkillsFuture Workforce Development Grant (Job Redesign+), which funds up to 70 percent of job redesign costs for SMEs and up to 50 percent for larger firms, capped at 150,000 Singapore dollars per enterprise.',
     targetPopulation:'Enterprises rather than individuals. The employer applies, and the workers affected are whoever holds the redesigned roles.',
     detail:[
-      'Firms can claim up to 30,000 Singapore dollars for consultancy, with a higher funding share for SMEs than for larger firms.',
-      'The scheme is administered by the Singapore National Employers Federation on Workforce Singapore’s behalf.',
+      'Under the original grant, firms could claim up to 30,000 Singapore dollars for consultancy, with a higher funding share for SMEs than for larger firms.',
+      'The original grant was administered by the Singapore National Employers Federation on Workforce Singapore’s behalf.',
+      'The successor grant extends support beyond consultancy to capability building in job redesign, and is open to enterprises operating in Singapore with at least three local employees.',
       'In the Philippines, industry reporting describes firms using AI to augment staff and creating roles such as AI trainers, prompt engineers and AI ethicists. That is related practice rather than a formal job-redesign programme.',
     ],
     criteria:{
-      sustainability:{r:'Low', why:'The grant ends on 31 December 2025 and I found no successor.'},
+      sustainability:{r:'Moderate', why:'The original grant ended on 31 December 2025, but job redesign support continued under a larger successor grant from March 2026, which suggests a continuing commitment. The successor is new, so its long-term record is not yet shown.'},
       impact:{r:'High in principle', why:'It changes the job rather than only the worker, which matches the task-level nature of the exposure evidence.'},
       feasibility:{r:'Low to moderate', why:'I did not identify a comparable Philippine funding programme.'},
       effectiveness:{r:'Not shown', why:'I found no impact evaluation of the grant among my sources.'},
     },
-    rankWhy:'Strong in principle, because redesigning the job rather than only the worker matches what the exposure evidence describes. Three things put it low: no impact evaluation, a stated end date with no successor, and no comparable Philippine funding vehicle. And nothing happens unless an employer chooses to act.',
-    ref:['wsg','dagooc2026'] },
+    rankWhy:'Strong in principle, because redesigning the job rather than only the worker matches what the exposure evidence describes. Two things put it low: no impact evaluation, and no comparable Philippine funding vehicle. Its Singapore support has continued under a successor grant, but nothing happens unless an employer chooses to act.',
+    ref:['wsg','momwsg2026','dagooc2026'] },
 
   { id:'s3', rank:1, name:'Place-and-train career conversion', short:'Place-and-train', where:'Singapore',
     what:'A jobseeker is hired into a new growth role by a participating company, which then provides on-the-job or industry-recognised training.',
@@ -414,7 +418,7 @@ export const CRITERIA_PROVENANCE =
   'These four were agreed by the class in the Week 8 session as the criteria for evaluating success. The session recording transcribes the third as "visibility", but the student who proposed it said feasibility and described it as covering whether a solution is realistic and possible to implement. The wording still needs confirming against the class-approved criteria sheet. No numerical scores or weights were agreed, so none are used here.';
 
 export const RANKING_NOTE =
-  'The relative order of the first three is the same as in Milestone 2. I checked it against the Terminal Assessment criteria rather than assuming it. Sustainability replacing acceptability pulled JobStart up and job redesign down, which is why the two added solutions sit where they do.';
+  'The relative order of the first three is the same as in Milestone 2. I checked it against the Terminal Assessment criteria rather than assuming it. Sustainability replacing acceptability pulled JobStart up. The two added solutions sit below the Philippine programmes because, with effectiveness not shown for any of the four, both rate lower on feasibility here: job redesign has no comparable Philippine funding vehicle, and individual training accounts would be the heaviest lift of the five.';
 
 /* ------------------------------------------------------ singapore evidence */
 export const SG_OUTCOMES = [
@@ -489,7 +493,7 @@ export const PROPOSAL = {
     haveLegal:[
       { t:'RA 11962, Trabaho Para sa Bayan Act', d:'Establishes a National Employment Master Plan. Section 4(b) covers skilling, upskilling and reskilling with an emphasis on lifelong learning; 4(c) encourages private sector skills transfer; 6(c) requires analysis of the employment situation.', ref:['ra11962'] as RefKey[] },
       { t:'RA 12063, EBET Framework Act', d:'Institutionalises enterprise-based education and training. Section 6 makes both new labour force entrants and employed workers eligible, and Section 4(i) covers enterprise upskilling for existing employees. TESDA is the primary implementing agency.', ref:['ra12063'] as RefKey[] },
-      { t:'740 million peso commitment', d:'Live funding attached to the reskilling mandate, targeting 340,000 IT-BPM workers, set to start in the second half of 2025.', ref:['malaya2025'] as RefKey[] },
+      { t:'740 million peso commitment', d:'Live funding attached to the reskilling mandate, targeting up to 340,000 participants, including near-hire individuals and college students, set to start in the second half of 2025.', ref:['malaya2025'] as RefKey[] },
     ],
     haveOps:[
       { t:'Employer incentive already legislated', d:'RA 12063 Section 20 gives an additional deduction of 50 percent of actual training expenses through 31 December 2027, rising to 75 percent from 1 January 2028, capped at the lower of 5 percent of total direct labour expenses or 25 million pesos a year.', ref:['ra12063'] as RefKey[] },
@@ -591,7 +595,7 @@ export const IMPL_ACTORS: ImplActor[] = [
     ref:['ra12063','tesda2025'] },
   { id:'dict', name:'DICT and IBPAP', short:'DICT and IBPAP',
     stages:['hire'],
-    statutory:'Already align programme strategies around the 740 million peso IT-BPM reskilling commitment targeting 340,000 workers.',
+    statutory:'Already align programme strategies around the 740 million peso IT-BPM reskilling commitment targeting up to 340,000 participants.',
     proposed:'Would identify which growth roles are worth converting into, and could fund a first cohort from the existing commitment rather than a new appropriation.',
     ref:['malaya2025','khan2026'] },
   { id:'lgu', name:'Local government units', short:'LGUs',

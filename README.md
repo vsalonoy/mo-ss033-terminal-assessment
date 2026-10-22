@@ -92,7 +92,7 @@ information.
 ## How it is put together
 
 ```
-src/data/research.ts     All research content, citations and the 17 references.
+src/data/research.ts     All research content, citations and the 18 references.
                          Every section reads from this one file. Edit content here.
 src/hooks/               Reduced-motion detection, scroll tracking, fragment and citation navigation.
 src/components/

@@ -589,7 +589,7 @@ export function References() {
   return (
     <Section id="references" letter="L" label="References"
       title="References"
-      lede={`${REFERENCES.length} sources, APA 7. Every URL was opened and checked against the claim it supports. Primary sources are used wherever one exists.`}>
+      lede={`${REFERENCES.length} sources, APA 7. Each was checked against the claim it supports in October 2026. Where an original page has since been removed, the entry links to an archived copy. Primary sources are used wherever one exists.`}>
       <p className="t-micro mb-8 max-w-reading">
         Sections B, D, E and F also carry evidence cards beside the claims themselves, showing what
         each source reports and the area it covers. Those are a shortcut for checking a figure. This
