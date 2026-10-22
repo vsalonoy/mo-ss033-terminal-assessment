@@ -136,11 +136,14 @@ After section L there is a Mentor Feedback form. GitHub Pages cannot send email,
 form posts to Web3Forms, which emails each submission to the address its access key was
 created for. Nothing is stored on, or shown by, this site.
 
-The key is read at build time from `VITE_FEEDBACK_ACCESS_KEY`. It is never committed:
-locally it goes in `.env.local` (ignored by git), and for the published site it would be
-a repository variable passed to the build step in `.github/workflows/deploy.yml`. Without
-a key the form shows "Not yet connected" and its fields are disabled, so it never looks
-like it works when it does not.
+The key is read at build time from `VITE_FEEDBACK_ACCESS_KEY`. A Web3Forms access key is
+a public form identifier, not a secret: it ends up in the compiled page and only lets
+someone send mail to that one address. It is still kept out of the repository: locally
+it goes in `.env.local` (ignored by git), and for the published site it is a repository
+variable (Settings > Secrets and variables > Actions > Variables) that
+`.github/workflows/deploy.yml` passes to the build step only. Without a key the form
+shows "Not yet connected" and its fields are disabled, so it never looks like it works
+when it does not.
 
 ### Accessibility
 

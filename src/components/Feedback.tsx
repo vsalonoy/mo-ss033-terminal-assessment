@@ -7,7 +7,8 @@ import { useEffect, useId, useRef, useState, type FormEvent } from 'react';
  * Delivery goes through Web3Forms, a form-to-email service built for static sites
  * such as this one. The browser posts the form to the service, and the service
  * emails it to the address the access key was created for. Nothing is stored or
- * shown on this site.
+ * shown on this site. The key is a public form identifier, not a secret: it is
+ * compiled into the page and only lets someone send mail to that address.
  *
  * The access key comes from the build environment (VITE_FEEDBACK_ACCESS_KEY,
  * kept in an uncommitted .env.local file or a repository variable). Without it
@@ -139,7 +140,10 @@ export function MentorFeedback() {
         setStatus({ kind: 'failed', message: 'Your feedback could not be sent. Please try again later.' });
       }
     } catch {
-      setStatus({ kind: 'failed', message: 'Your feedback could not be sent because the connection failed. Please check your connection and try again.' });
+      /* A timeout is not a connection failure: the service may still have received the message. */
+      setStatus({ kind: 'failed', message: ctl.signal.aborted
+        ? 'The delivery service did not respond in time, so your feedback may not have been sent. Please wait a few minutes before trying again.'
+        : 'Your feedback could not be sent because the connection failed. Please check your connection and try again.' });
     } finally {
       window.clearTimeout(timer);
       inFlight.current = false;
@@ -265,8 +269,9 @@ export function MentorFeedback() {
               <div className="mlabel text-mute">Privacy</div>
               <p className="mt-2">
                 What you submit is used only to review and improve this assessment. It is sent by email
-                to the student through a form delivery service, Web3Forms, and is never published on this
-                website. Your email address is optional. Please do not include sensitive personal information.
+                to the student through a third-party form delivery service, Web3Forms, which handles it under
+                its own privacy policy. It is never published on this website. Your email address is optional
+                and is used only to reply to you. Please do not include sensitive personal information.
               </p>
             </div>
             <div>

@@ -39,7 +39,12 @@ jobs:
       - run: npm ci
 
       # Fails the run on any TypeScript error, so a broken build is never published.
+      # VITE_FEEDBACK_ACCESS_KEY is a repository variable, not a secret: Web3Forms
+      # access keys are public form identifiers and end up in the compiled page.
+      # If the variable is not set, the feedback form builds as "Not yet connected".
       - run: npm run build
+        env:
+          VITE_FEEDBACK_ACCESS_KEY: ${{ vars.VITE_FEEDBACK_ACCESS_KEY }}
 
       - uses: actions/configure-pages@v5
 
