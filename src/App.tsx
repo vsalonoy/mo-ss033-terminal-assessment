@@ -5,6 +5,7 @@ import { AmbientField, AmbientBlooms } from './components/Ambient';
 import Hero from './components/Hero';
 import { Intro, Challenge, Stakeholders, Solutions, Ranking } from './components/SectionsAE';
 import { Proposal, Journey, Smart, Criteria, Risks, Conclusion, References } from './components/SectionsFL';
+import { MentorFeedback } from './components/Feedback';
 import { SECTIONS } from './data/research';
 
 /**
@@ -57,6 +58,9 @@ export default function App() {
           </div>
         ))}
       </main>
+
+      {/* After section L, outside the research sections and the section menu. */}
+      <MentorFeedback />
 
       <div className="relative z-10"><Footer /></div>
     </SiteCtx.Provider>

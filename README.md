@@ -130,6 +130,18 @@ Following one adds a history entry, so the browser's Back button returns to the 
 reference entry offers a "Back to the citation" button. A link straight to a reference, such as
 `#ref-ra11962`, scrolls to that entry and focuses it on first load.
 
+### Mentor feedback form
+
+After section L there is a Mentor Feedback form. GitHub Pages cannot send email, so the
+form posts to Web3Forms, which emails each submission to the address its access key was
+created for. Nothing is stored on, or shown by, this site.
+
+The key is read at build time from `VITE_FEEDBACK_ACCESS_KEY`. It is never committed:
+locally it goes in `.env.local` (ignored by git), and for the published site it would be
+a repository variable passed to the build step in `.github/workflows/deploy.yml`. Without
+a key the form shows "Not yet connected" and its fields are disabled, so it never looks
+like it works when it does not.
+
 ### Accessibility
 
 Reduced motion is honoured throughout: entrance animations and counters resolve immediately and
