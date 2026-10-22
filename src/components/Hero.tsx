@@ -4,6 +4,7 @@ import ParticleField from './ParticleField';
 import { usePrefersReducedMotion } from '../hooks/useSiteState';
 import { PROJECT, HEADLINE_STATS } from '../data/research';
 import { Counter, Cite } from './primitives';
+import { MEDIA } from '../data/media';
 
 const WORDS = PROJECT.headline.split(' ');
 
@@ -35,12 +36,27 @@ export default function Hero() {
     <header ref={wrapRef} id="top" className="relative min-h-[100svh] flex flex-col overflow-hidden">
       <motion.div
         aria-hidden className="absolute inset-0 inert"
-        style={reduced ? undefined : { y: fieldY, opacity: fieldFade }}
+        /* Reduced motion keeps the same 0.7 starting opacity as the animated field, static. */
+        style={reduced ? { opacity: 0.7 } : { y: fieldY, opacity: fieldFade }}
       >
+        {/* Illustrative photograph behind the network: people at work in an IT-BPM
+            setting, desaturated and darkened. At 16 percent opacity even a white pixel
+            behind the grey lede leaves it above 5:1, so body text keeps AA contrast. */}
+        <img src={MEDIA.hero.src} srcSet={MEDIA.hero.srcSet} sizes="100vw"
+          width={MEDIA.hero.width} height={MEDIA.hero.height} alt="" fetchPriority="high" decoding="async"
+          className="absolute inset-0 h-full w-full object-cover opacity-[0.16] grayscale-[0.55]" />
         <ParticleField className="absolute inset-0 h-full w-full" />
       </motion.div>
       <div aria-hidden className="absolute inset-0 inert bg-[radial-gradient(90%_70%_at_50%_0%,rgba(6,182,212,0.11),transparent_62%)]" />
       <div aria-hidden className="absolute inset-x-0 bottom-0 h-56 inert bg-gradient-to-t from-ink-900 to-transparent" />
+      {/* Readability scrim, above the photograph and particle network and below the
+          text. Particle nodes are bright, and one passing under a letter dropped local
+          contrast below 2:1 (it did so before the photograph was added too). The scrim
+          is darkest behind the text column and clears towards the right edge on wide
+          screens, so the network stays visible where there is no text. */}
+      <div aria-hidden className="absolute inset-0 inert
+        bg-[linear-gradient(180deg,rgba(5,11,22,0.6)_0%,rgba(5,11,22,0.8)_18%,rgba(5,11,22,0.8)_85%,rgba(5,11,22,0.6)_100%)]
+        lg:bg-[linear-gradient(90deg,rgba(5,11,22,0.82)_0%,rgba(5,11,22,0.76)_50%,rgba(5,11,22,0.5)_80%,rgba(5,11,22,0.15)_100%)]" />
 
       <div className="relative flex-1 flex items-center">
         <motion.div
@@ -115,6 +131,9 @@ export default function Hero() {
           >
             {PROJECT.student} &nbsp;&middot;&nbsp; Section {PROJECT.section} &nbsp;&middot;&nbsp;
             Mentor {PROJECT.mentor} &nbsp;&middot;&nbsp; {PROJECT.version}
+            <span className="mt-2 block text-[0.72rem] text-mute">
+              Background: illustrative photograph of a call-centre pantry in Manila by {MEDIA.hero.creator}, {MEDIA.hero.license}, adapted. Credits in section L.
+            </span>
           </motion.div>
         </motion.div>
       </div>

@@ -649,6 +649,8 @@ export const JOURNEY_CAVEAT =
 export interface Smart {
   id:string; name:string; definition:string; target:string; method:string;
   source:string; timeframe:string; owner:string; assumption:string;
+  /** True where the indicator sets no threshold yet, so it is a proposed measure rather than a target. */
+  measureOnly?: boolean;
   /** The Assessment Guide asks for objective, target group and baseline alongside
    *  the four fields already here. Where no Philippine baseline exists, the entry
    *  says so rather than carrying a number from somewhere it does not belong. */
@@ -699,7 +701,7 @@ export const SMART: Smart[] = [
     objective:'Check that places reach the groups the exposure evidence identifies, rather than the easiest candidates to recruit.',
     targetGroup:'Women, young entry-level workers, and workers in NCR, Central Luzon and Calabarzon.',
     baseline:'The ILO exposure shares serve as the reference point rather than a baseline: women at roughly double men\u2019s exposure, and around two in five NCR jobs exposed. These describe exposure, not demand for places.' },
-  { id:'m6', name:'Worker-reported outcome',
+  { id:'m6', name:'Worker-reported outcome', measureOnly:true,
     definition:'Whether participants say the conversion improved their security and prospects. Worker acceptability was unmeasured in everything I reviewed.',
     target:'Establish a baseline in the first cohort rather than set a pass mark', method:'Short standardised survey',
     source:'Survey at completion and at six months', timeframe:'6 months', owner:'DOLE',
@@ -805,6 +807,108 @@ export const RECOMMENDATIONS: Recommendation[] = [
     ],
     consideration:'No Philippine baseline exists for most of the indicators, so the first cohort would set it.' },
 ];
+
+/* ------------------------------------------- before, present, future (A) */
+/**
+ * A visual summary of how the work has changed and how workers could adapt.
+ * It restates sourced findings from sections B to H; it adds no new research.
+ * "Before" means the established IT-BPM model, not a dated historical period.
+ * "Future" is the proposed response and is labelled as such everywhere.
+ */
+export const STAGE_DIMENSIONS = [
+  { key:'process',   label:'Work processes' },
+  { key:'tech',      label:'Technologies' },
+  { key:'skills',    label:'Worker skills' },
+  { key:'challenge', label:'Challenges' },
+  { key:'response',  label:'Workforce response' },
+] as const;
+export type StageDimension = typeof STAGE_DIMENSIONS[number]['key'];
+export interface Stage {
+  key: 'before' | 'present' | 'future'; label: string; title: string; note: string;
+  cells: Record<StageDimension, Sentence[]>;
+}
+export const STAGES: Stage[] = [
+  { key:'before', label:'Before', title:'Traditional workplaces',
+    note:'The established IT-BPM model, before generative AI tools were widely adopted. Not a dated period.',
+    cells:{
+      process:[{ t:'Routine, standardised tasks carried out by large numbers of workers', refs:['khan2026'] }],
+      tech:[{ t:'Workplace technology supported the work, while people handled most routine processing and core contact-centre and transactional services', refs:['dagooc2026','khan2026'] }],
+      skills:[{ t:'Skills built around core contact-centre and transactional work', refs:['dagooc2026'] }],
+      challenge:[{ t:'Many of the most availed technical and vocational courses led to low-productivity, low-pay occupations', refs:['adb2021'] }],
+      response:[{ t:'The problem identified was training quality rather than training volume', refs:['adb2021'] }],
+    } },
+  { key:'present', label:'Present', title:'AI-assisted workplaces',
+    note:'What the sources report now.',
+    cells:{
+      process:[{ t:'Automation is reshaping roles from content writing to customer service, and more than two thirds of industry member firms run AI pilots', refs:['khan2026'] }],
+      tech:[{ t:'Generative AI is being deployed to augment rather than replace workers', refs:['dagooc2026'] }],
+      skills:[{ t:'AI and automation expertise is the most sought-after skill, and roles such as AI trainers and prompt engineers are appearing', refs:['dagooc2026'] }],
+      challenge:[{ t:'12.7 million workers are in exposed occupations, yet exposure means tasks within a job can be automated, not that the job is lost: 3.6 percent of jobs sit in the highest displacement risk category', refs:['huynh2026'] }],
+      response:[{ t:'An industry upskilling budget for up to 340,000 participants, and more than 23,000 online courses opened through TESDA', refs:['malaya2025','tesda2025'] }],
+    } },
+  { key:'future', label:'Future', title:'Proposed workforce transition',
+    note:'A proposed response, not a forecast. No agency has agreed to it.',
+    cells:{
+      process:[{ t:'Workers hired into growth roles before training is complete, as in Singapore’s place-and-train model', refs:['mti2025'] }],
+      tech:[{ t:'Enterprise-based training registered with TESDA, a framework that already covers employed workers', refs:['ra12063'] }],
+      skills:[{ t:'Continuous reskilling tied to conversion roles that employers have confirmed' }],
+      challenge:[{ t:'Income during a mid-career transition and a matching function for displaced workers are still missing' }],
+      response:[{ t:'A proposed place-and-train track with a training allowance, judged by six proposed SMART measures' }],
+    } },
+];
+
+/* ---------------------------------------------- globalization network (A) */
+/** Nodes and the direction of influence. Every node is a sourced statement. */
+export const GLOBAL_NETWORK = {
+  clients:    { title:'International clients', body:[{ t:'Increasingly expect outsourcing providers to use AI to reduce costs and improve productivity', refs:['khan2026'] }] as Sentence[] },
+  competitors:{ title:'Global competition', body:[{ t:'Providers must keep pace with competitors in countries such as India', refs:['khan2026'] }] as Sentence[] },
+  hub:        { title:'Philippine IT-BPM providers', body:[{ t:'A global outsourcing hub for more than two decades', refs:['khan2026'] }] as Sentence[] },
+  tech:       { title:'Technology adoption', body:[{ t:'More than two thirds of industry member firms run AI pilots', refs:['khan2026'] }] as Sentence[] },
+  workers:    { title:'Filipino workers', body:[{ t:'1.68 million in contact centres alone, where tasks are changing as AI is adopted', refs:['dagooc2026','khan2026'] }] as Sentence[] },
+  skills:     { title:'Changing skills demand', body:[{ t:'AI and automation expertise ranks as the most sought-after skill', refs:['dagooc2026'] }] as Sentence[] },
+  edges: {
+    clientsToHub: 'outsourced work, and pressure to adopt AI',
+    competitorsToHub: 'pressure to keep pace',
+    techToHub: 'adoption inside firms',
+    hubToWorkers: 'jobs, and tasks that change',
+    skillsToWorkers: 'new skills required',
+  },
+};
+
+/* -------------------------------------------- automation mechanism (B) */
+export const AUTOMATION_FLOW: { title: string; body: Sentence[] }[] = [
+  { title:'Why firms adopt AI', body:[
+    { t:'Growth, international client expectations, and lower costs with higher productivity', refs:['dagooc2026','khan2026'] },
+    { t:'Talent readiness, ahead of cost, is the biggest obstacle to scaling it', refs:['dagooc2026'] } ] },
+  { title:'Tasks change', body:[
+    { t:'Exposure means tasks within an occupation can be automated', refs:['huynh2026'] } ] },
+  { title:'Skills change', body:[
+    { t:'Demand rises for AI and automation expertise and for new roles', refs:['dagooc2026'] } ] },
+];
+export const AUTOMATION_OUTCOMES: { label: string; tone: 'cyan' | 'neutral' | 'amber'; body: Sentence[] }[] = [
+  { label:'Job transformation', tone:'cyan', body:[{ t:'The most significant likely impact on the Philippine labour market', refs:['huynh2026'] }] },
+  { label:'Reskilling into new roles', tone:'neutral', body:[{ t:'Firms are creating specialised roles alongside augmented ones', refs:['dagooc2026'] }] },
+  { label:'Displacement risk', tone:'amber', body:[{ t:'Some roles can become redundant; 3.6 percent of jobs sit in the highest risk category', refs:['khan2026','huynh2026'] }] },
+];
+
+/* ------------------------------------------- proposed pathway (F to G) */
+/**
+ * The proposal as five parts. Each part names the section G journey steps it
+ * corresponds to, so the two read as one process rather than two.
+ */
+export const PATHWAY: { part: number; title: string; body: Sentence[]; steps: number[] }[] = [
+  { part:1, title:'Identify affected roles', steps:[1], body:[{ t:'Employers automating roles would refer the workers affected' }] },
+  { part:2, title:'Assess skills', steps:[2], body:[{ t:'PESO intake and assessment, as JobStart already does', refs:['dole'] }] },
+  { part:3, title:'Hire into the new role first', steps:[3], body:[{ t:'A participating employer hires before training is complete', refs:['mti2025'] }] },
+  { part:4, title:'Train and support income', steps:[4, 5], body:[
+    { t:'TESDA-registered enterprise training', refs:['ra12063'] },
+    { t:'A proposed training allowance on the JobStart pattern' } ] },
+  { part:5, title:'Monitor outcomes', steps:[6], body:[{ t:'Completion, six-month retention and wage change, against the proposed SMART measures' }] },
+];
+/** Which pathway part each section G journey step belongs to. */
+export const PART_FOR_STEP: Record<number, number> = Object.fromEntries(
+  PATHWAY.flatMap(p => p.steps.map(s => [s, p.part])),
+);
 
 /* ------------------------------------------------------------- navigation */
 export interface SectionDef { id:string; label:string; letter:string }

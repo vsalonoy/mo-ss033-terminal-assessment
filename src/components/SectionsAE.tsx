@@ -4,6 +4,8 @@ import { Section, Reveal, Cite, Chip, Caveat, Sentences } from './primitives';
 import { usePrefersReducedMotion } from '../hooks/useSiteState';
 import { BarsH, WageTrajectory, ProportionRing } from './viz';
 import { EvidenceCards } from './Evidence';
+import { GlobalNetwork, TransitionStages, AutomationMechanism, PhotoBand } from './Visuals';
+import { MEDIA } from '../data/media';
 import {
   PROJECT, AUDIENCE, EXPOSURE_BY_REGION, EXPOSURE_NOTES, EXPOSURE_VS_ASEAN, STAKEHOLDERS, STAKEHOLDER_LIMIT,
   SOLUTIONS, RANKED, CRITERIA, CRITERIA_PROVENANCE, RANKING_NOTE, SG_OUTCOMES, SG_CAVEAT,
@@ -47,6 +49,8 @@ export function Intro() {
           </p>
         </div>
       </Reveal>
+      <GlobalNetwork />
+      <TransitionStages />
       <Reveal>
         <div className="mt-12">
           <div className="eyebrow">Who this is written for</div>
@@ -95,7 +99,13 @@ export function Challenge() {
     <Section id="challenge" letter="B" label="The Philippine automation challenge"
       title="Exposure is high, disruption so far is not"
       lede="Exposure means tasks inside an occupation can be automated. It is not the same as a job being removed. Holding those two apart is the whole basis of my position.">
-      <div className="grid lg:grid-cols-2 gap-10 items-start">
+      <PhotoBand m={MEDIA.itPark} />
+      <div className="mt-12">
+        <div className="eyebrow">From adoption to outcomes</div>
+        <h3 className="mt-3 mb-6 font-display text-sub text-sand">How automation reaches workers</h3>
+        <AutomationMechanism />
+      </div>
+      <div className="mt-14 grid lg:grid-cols-2 gap-10 items-start">
         <Reveal>
           <div className="space-y-5 prose-r">
             <p>
@@ -397,7 +407,8 @@ export function Solutions() {
             ))}
           </div>
 
-          <div className="mt-4 overflow-x-auto card">
+          <p className="md:hidden mt-4 t-micro">Scroll the table sideways to see all four criteria.</p>
+          <div className="mt-4 overflow-x-auto card" tabIndex={0} role="region" aria-label="Comparison table, scrollable sideways">
             <table className="w-full text-left border-collapse min-w-[680px]">
               <caption className="sr-only">
                 Five solutions rated against sustainability, impact, feasibility and effectiveness.

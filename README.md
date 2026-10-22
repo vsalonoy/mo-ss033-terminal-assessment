@@ -103,9 +103,13 @@ src/components/
   SectionsAE.tsx         Sections A to E.
   SectionsFL.tsx         Sections F to L.
   Evidence.tsx           Evidence cards, and the implementation responsibility map in F.
+  Visuals.tsx            Photographs, the before/present/future comparison, and the
+                         globalization, automation and proposed-pathway diagrams.
   viz.tsx                The hand-built SVG charts. No charting library.
   Ambient.tsx            Background field, blooms and the scroll progress line.
 src/App.tsx              The twelve sections, rendered in order as one document.
+src/data/media.ts        Every photograph with its source, creator, licence and adaptation.
+src/assets/media/        The photographs as WebP, bundled with the site (no external requests).
 ```
 
 ### Editing the research

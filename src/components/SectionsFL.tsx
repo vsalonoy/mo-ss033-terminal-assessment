@@ -3,10 +3,12 @@ import { motion } from 'motion/react';
 import { Section, Reveal, Cite, Chip, Caveat, Disclosure, Sentences, REF_FOLLOWED, type RefFollowed } from './primitives';
 import { StepRates } from './viz';
 import { EvidenceCards, ImplementationMap } from './Evidence';
+import { Photo, PhotoBand, ProposedPathway } from './Visuals';
+import { MEDIA, type Media } from '../data/media';
 import { usePrefersReducedMotion } from '../hooks/useSiteState';
 import {
   PROPOSAL, JOURNEY, JOURNEY_CAVEAT, JOURNEY_STAGES, SMART, SMART_CAVEAT, EBET_DEDUCTION,
-  PROPOSAL_CRITERIA, RISKS, CONCLUSION, REFERENCES, PROJECT, RECOMMENDATIONS, RECOMMENDATIONS_INTRO, type RefKey,
+  PROPOSAL_CRITERIA, RISKS, CONCLUSION, REFERENCES, PROJECT, RECOMMENDATIONS, RECOMMENDATIONS_INTRO, PART_FOR_STEP, type RefKey,
 } from '../data/research';
 
 /* ------------------------------------------------------------------ F */
@@ -29,6 +31,22 @@ export function Proposal() {
             </div>
           </Reveal>
         ))}
+      </div>
+
+      {/* how it would run, in five parts that map onto the section G journey */}
+      <div className="mt-14 grid gap-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] items-center">
+        <Photo m={MEDIA.tesda} sizes="(min-width: 1024px) 470px, 100vw" />
+        <Reveal>
+          <div className="eyebrow">How the track would run</div>
+          <h3 className="mt-3 font-display text-sub text-sand">Five parts, from an affected role to measured outcomes</h3>
+          <p className="t-lede mt-4">
+            The three mechanisms above become five practical parts once intake and monitoring are
+            included. The worker journey in section G follows the same parts, step by step.
+          </p>
+        </Reveal>
+      </div>
+      <div className="mt-8">
+        <ProposedPathway />
       </div>
 
       {/* the gap */}
@@ -258,6 +276,11 @@ export function Journey() {
 
       <div className="mt-10 grid lg:grid-cols-[22rem_minmax(0,1fr)] gap-8 items-start">
         {/* step rail, with a spine that fills as the reader moves down it */}
+        <div>
+            <p className="t-micro mb-3 max-w-reading">
+              These six steps follow the five parts of the proposed track in{' '}
+              <a href="#proposal" className="text-cyan-300 underline decoration-dotted underline-offset-2">section F</a>.
+            </p>
         <div className="relative">
           <div aria-hidden className="absolute left-[1.42rem] top-4 bottom-4 w-px bg-line inert" />
           <motion.div
@@ -294,12 +317,14 @@ export function Journey() {
                         {j.label}
                       </span>
                       <span className="block mt-0.5 text-[0.76rem] text-mute">{j.who}</span>
+                      <span className="mt-1 block mlabel text-cyan-300/75">Part {PART_FOR_STEP[j.step]} of the proposed track</span>
                     </span>
                   </button>
                 </li>
               );
             })}
           </ol>
+        </div>
         </div>
 
         {/* panel */}
@@ -381,11 +406,21 @@ export function Smart() {
                 </div>
 
                 <div className="mt-4 border-l-2 border-l-cyan-500/50 pl-4">
-                  <div className="mlabel text-mute">Proposed target</div>
+                  <div className="mlabel text-amber/90">{m.measureOnly ? 'Proposed measure' : 'Proposed target'}</div>
                   <div className="mt-1 font-display text-[1.08rem] font-bold leading-snug text-cyan-300">{m.target}</div>
                 </div>
 
                 <p className="mt-4 text-[0.85rem] leading-relaxed text-sand/85">{m.definition}</p>
+
+                {/* The three facts a reader scans for, visible without opening the detail. */}
+                <dl className="mt-4 grid gap-2 rounded-lg border border-line/70 bg-ink-800/60 p-3">
+                  {[['Measured by', m.method], ['Responsible (proposed)', m.owner], ['When', m.timeframe]].map(([k, v]) => (
+                    <div key={k} className="grid grid-cols-[7.5rem_minmax(0,1fr)] gap-2">
+                      <dt className="mlabel text-mute pt-0.5">{k}</dt>
+                      <dd className="text-[0.82rem] leading-snug text-sand/90">{v}</dd>
+                    </div>
+                  ))}
+                </dl>
 
                 <button
                   onClick={() => setOpen(isOpen ? null : m.id)} aria-expanded={isOpen}
@@ -400,9 +435,8 @@ export function Smart() {
                 {isOpen && (
                   <dl className="mt-4 space-y-3 border-t border-line/60 pt-4">
                     {[['Objective', m.objective], ['Target group', m.targetGroup],
-                      ['Baseline', m.baseline], ['Measurement tool', m.method],
-                      ['Data source', m.source], ['Time point', m.timeframe],
-                      ['Responsible', m.owner], ['What it cannot tell you', m.assumption]].map(([k, v]) => (
+                      ['Baseline', m.baseline], ['Data source', m.source],
+                      ['What it cannot tell you', m.assumption]].map(([k, v]) => (
                       <div key={k}>
                         <dt className="mlabel text-mute">{k}</dt>
                         <dd className={`mt-0.5 text-[0.82rem] leading-relaxed ${
@@ -560,6 +594,8 @@ export function Conclusion() {
         </ol>
       </div>
 
+      <PhotoBand m={MEDIA.lab} className="mt-14" />
+
       <Reveal>
         <div className="mt-12 card p-7 border-cyan-500/30 bg-cyan-500/[0.04]">
           <div className="eyebrow">Position restated</div>
@@ -627,6 +663,31 @@ export function References() {
           </li>
         ))}
       </ul>
+
+      {/* Credits for every photograph on the site, as each licence requires. */}
+      <div className="mt-14 max-w-reading">
+        <div className="eyebrow">Photographs</div>
+        <p className="t-micro mt-3">
+          All photographs are illustrative. None documents a finding of this research or shows a
+          participant. Each was cropped, resized and converted for the web; the CC BY-SA adaptations
+          are shared under the same licence.
+        </p>
+        <ul className="mt-5 space-y-4">
+          {(Object.values(MEDIA) as Media[]).map(m => (
+            <li key={m.key} className="pl-8 -indent-8 text-[0.86rem] leading-relaxed text-sand/90">
+              {m.caption} “{m.title}”, photograph by {m.creator}.{' '}
+              {m.licenseUrl
+                ? <a href={m.licenseUrl} target="_blank" rel="noopener noreferrer" className="text-cyan-300 underline decoration-cyan-500/40 underline-offset-2">{m.license}<span className="sr-only"> (opens in a new tab)</span></a>
+                : m.license}
+              . {m.adapted}{' '}
+              <a href={m.source} target="_blank" rel="noopener noreferrer"
+                className="[overflow-wrap:anywhere] text-cyan-300 underline decoration-cyan-500/40 underline-offset-2">
+                Source on Wikimedia Commons<span className="sr-only"> (opens in a new tab)</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
     </Section>
   );
 }
