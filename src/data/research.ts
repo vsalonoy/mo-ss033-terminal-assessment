@@ -10,6 +10,9 @@ export type RefKey =
   | 'mti2025' | 'psa2026' | 'ra10869' | 'ra11962' | 'ra12063'
   | 'tesda2025' | 'wsg';
 
+/** A sentence and the sources it draws on. Rendered with its citation before the full stop. */
+export interface Sentence { t: string; refs?: RefKey[] }
+
 export interface Reference {
   key: RefKey; author: string; year: string; title: string;
   container?: string; url: string; note?: string;
@@ -185,6 +188,33 @@ export const AUDIENCE = {
   needed: 'What is less widely understood is the difference between exposure and displacement. More than a quarter of Philippine employment sits in exposed occupations, but only 3.6 percent falls in the highest displacement risk group, and the disruption has not arrived at the scale the warnings implied. The support that exists is also narrower than it appears: training is funded, but income during a mid-career transition is not.',
   consider: 'After reading, the intended audience should be able to say which existing Philippine programme would and would not cover a worker in their situation, and why income support during retraining is the gap this proposal tries to close rather than another training scheme.',
   ref: ['huynh2026'] as RefKey[],
+};
+
+/* -------------------------------------------------------- globalization (A) */
+/** How the driver reaches Filipino workers. Every sourced sentence carries its citation. */
+export const GLOBALIZATION: { heading: string; sentences: Sentence[] } = {
+  heading: 'Why this is a globalization issue',
+  sentences: [
+    { t:'Technology is the globalization driver here, and it reaches Filipino workers through the global trade in services' },
+    { t:'For more than two decades the IT-BPM industry has helped position the Philippines as a global outsourcing hub, and that concentration of service-sector and outsourcing roles is what leaves the Philippine workforce particularly exposed to automation', refs:['khan2026'] },
+    { t:'The competition is international as well: Philippine providers must keep pace with competitors in countries such as India, and the national upskilling budget for IT-BPM workers is described as essential to the country’s global competitiveness as AI reshapes the workforce', refs:['malaya2025','khan2026'] },
+    { t:'Demand from abroad is shifting the skills employers want: global companies are seeking customer experience partners that combine human expertise with AI-enabled operations, and in an industry survey AI and automation expertise ranked as the most sought-after skills among employers', refs:['dagooc2026'] },
+    { t:'For workers in these roles, AI can raise productivity, change job requirements and make some roles redundant at the same time', refs:['khan2026'] },
+    { t:'Exposure is still not the same as job loss: the ILO describes it as the automation of tasks within occupations rather than full job replacement', refs:['huynh2026'] },
+  ],
+};
+
+/* ---------------------------------------------------- causes of adoption (B) */
+/** Why firms adopt AI, kept apart from what adoption does to workers. */
+export const ADOPTION_CAUSES: { heading: string; sentences: Sentence[] } = {
+  heading: 'Why firms are adopting AI',
+  sentences: [
+    { t:'Adoption is accelerating in the Philippines, particularly in the IT-BPM sector, although uptake remains uneven because of structural barriers', refs:['huynh2026'] },
+    { t:'In the contact centre industry, an executive survey ranked AI adoption as the third-largest growth driver for 2025, behind expanding existing client accounts and winning new customers, and named talent readiness, ahead of cost, as the biggest obstacle to scaling it', refs:['dagooc2026'] },
+    { t:'Industry experts also describe pressure from international clients that expect outsourcing providers to use AI to reduce costs and improve productivity', refs:['khan2026'] },
+    { t:'These are reasons firms adopt the technology' },
+    { t:'They are not measures of what happens to workers, and the evidence below keeps the two apart' },
+  ],
 };
 
 /* ------------------------------------------------------------- the numbers */
@@ -697,10 +727,77 @@ export const RISKS = [
   { cat:'Data', risk:'Outcome data may not be obtainable', why:'Retention and wage measures depend on employer returns and record matching', mit:'Agree the data arrangement before the first cohort, not after', ref:['ra10869'] as RefKey[] },
 ];
 
-export const CONCLUSION = [
-  'Workplace automation is changing Filipino jobs more than it is removing them, but the change is not landing evenly. More than a quarter of Philippine employment sits in occupations exposed to generative AI, the highest share in ASEAN, while only 3.6 percent falls into the highest displacement risk group.',
-  'Of the five solutions I evaluated against sustainability, impact, feasibility and effectiveness, place-and-train career conversion ranks first. It is the only one with a published control-group evaluation, and the only one that keeps a worker earning while the role changes. National reskilling remains the most feasible starting point here, and JobStart already runs the delivery mechanics.',
-  'The Philippines now has more of the pieces than I first credited. RA 12063 makes employed workers eligible for enterprise-based training and gives employers a legislated deduction for the cost. What is still missing is income support during a mid-career transition and a matching function for displaced workers. That is the gap this proposal tries to close, and the SMART measures are how it would be judged rather than assumed.',
+/**
+ * The conclusion, one entry per sentence so each sourced sentence carries its own
+ * citation. Sentences without refs are the author's own conclusions from the
+ * sections above and are deliberately uncited.
+ */
+export const CONCLUSION: Sentence[][] = [
+  [
+    { t:'Workplace automation is changing Filipino jobs more than it is removing them, but the change is not landing evenly', refs:['huynh2026'] },
+    { t:'More than a quarter of Philippine employment sits in occupations exposed to generative AI, the highest share in ASEAN, while only 3.6 percent falls into the highest displacement risk group', refs:['huynh2026'] },
+  ],
+  [
+    { t:'Of the five solutions I evaluated against sustainability, impact, feasibility and effectiveness, place-and-train career conversion ranks first' },
+    { t:'It is the only one with a published control-group evaluation, and the only one that keeps a worker earning while the role changes', refs:['mti2025'] },
+    { t:'National reskilling remains the most feasible starting point here, and JobStart already runs the delivery mechanics', refs:['dole','ra10869'] },
+  ],
+  [
+    { t:'The Philippines now has more of the pieces than I first credited' },
+    { t:'RA 12063 makes employed workers eligible for enterprise-based training and gives employers a legislated deduction for the cost', refs:['ra12063'] },
+    { t:'What is still missing is income support during a mid-career transition and a matching function for displaced workers' },
+    { t:'That is the gap this proposal tries to close, and the SMART measures are how it would be judged rather than assumed' },
+  ],
+];
+
+/* ------------------------------------------------------ recommendations (K) */
+/**
+ * Drawn from sections F, H and J. Every stakeholder named is a proposed
+ * implementation stakeholder only: none has been approached or has agreed.
+ */
+export interface Recommendation {
+  action: string; who: string; benefit: string; evidence: Sentence[]; consideration: string;
+}
+export const RECOMMENDATIONS_INTRO =
+  'These recommendations follow from the evaluation and the proposal above. The agencies and employers named are proposed implementation stakeholders: none has been approached, and none has adopted, funded or agreed to any of them.';
+export const RECOMMENDATIONS: Recommendation[] = [
+  { action:'Pilot a place-and-train conversion track with an initial IT-BPM cohort',
+    who:'Proposed: DOLE and PESOs to deliver, with participating IT-BPM employers.',
+    benefit:'Tests the top-ranked alternative where AI adoption is concentrated, with participants earning while they convert.',
+    evidence:[
+      { t:'In Singapore, place-and-train participants earned 2.5 percent more than control groups in the placement year and 5.8 to 6.5 percent more over the following four years, with retention 3.9 percentage points higher', refs:['mti2025'] },
+      { t:'AI adoption is accelerating particularly in IT-BPM, the sector the existing upskilling commitment is aimed at', refs:['huynh2026','malaya2025'] },
+    ],
+    consideration:'Singapore results may not transfer to the Philippines, so the pilot should be measured rather than assumed to work.' },
+  { action:'Introduce a training allowance for mid-career trainees',
+    who:'Proposed: DOLE.',
+    benefit:'Addresses the gap no existing scheme covers: income during a mid-career transition.',
+    evidence:[
+      { t:'The design could follow the JobStart pattern, in which DOLE sets a daily training allowance and, at the internship stage, participating employers pay a stipend of not less than 75 percent of the prevailing minimum wage', refs:['ra10869'] },
+      { t:'Those entitlements apply only to JobStart trainees aged 18 to 24, and mid-career conversion trainees have no equivalent entitlement today' },
+    ],
+    consideration:'No funding line for conversion exists yet, so the allowance would need one.' },
+  { action:'Use the existing EBET training-expense deduction where it applies',
+    who:'Proposed: participating employers, with programmes registered with and certified by TESDA.',
+    benefit:'Lowers employers’ training costs through an incentive already in law.',
+    evidence:[
+      { t:'An enterprise implementing a registered EBET programme can deduct an additional 50 percent of actual training expenses until 31 December 2027, rising to 75 percent from 1 January 2028, capped at the lower of 5 percent of total direct labour expenses or 25 million pesos a year', refs:['ra12063'] },
+    ],
+    consideration:'The deduction covers training expenses, not wages during conversion, and an enterprise registered with an investment promotion agency must choose between it and other fiscal incentives.' },
+  { action:'Link registered training to employer-confirmed conversion roles',
+    who:'Proposed: TESDA and training providers, with participating employers.',
+    benefit:'Points training at real vacancies rather than course volume.',
+    evidence:[
+      { t:'ADB found that the most availed technical and vocational courses often lead to low-productivity occupations', refs:['adb2021'] },
+    ],
+    consideration:'Employers would need to name the roles before training begins.' },
+  { action:'Agree how outcomes will be measured before the pilot begins',
+    who:'Proposed: DOLE and the Bureau of Local Employment, with PESOs and participating employers reporting, as set out for each indicator in section H.',
+    benefit:'Lets the six SMART indicators judge the track rather than assume it works.',
+    evidence:[
+      { t:'Section H sets a proposed target, data source and owner for each indicator, and section J recommends agreeing the data arrangement before the first cohort' },
+    ],
+    consideration:'No Philippine baseline exists for most of the indicators, so the first cohort would set it.' },
 ];
 
 /* ------------------------------------------------------------- navigation */

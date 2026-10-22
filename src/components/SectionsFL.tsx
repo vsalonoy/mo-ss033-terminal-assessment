@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
-import { Section, Reveal, Cite, Chip, Caveat, Disclosure, REF_FOLLOWED, type RefFollowed } from './primitives';
+import { Section, Reveal, Cite, Chip, Caveat, Disclosure, Sentences, REF_FOLLOWED, type RefFollowed } from './primitives';
 import { StepRates } from './viz';
 import { EvidenceCards, ImplementationMap } from './Evidence';
 import { usePrefersReducedMotion } from '../hooks/useSiteState';
 import {
   PROPOSAL, JOURNEY, JOURNEY_CAVEAT, JOURNEY_STAGES, SMART, SMART_CAVEAT, EBET_DEDUCTION,
-  PROPOSAL_CRITERIA, RISKS, CONCLUSION, REFERENCES, PROJECT, type RefKey,
+  PROPOSAL_CRITERIA, RISKS, CONCLUSION, REFERENCES, PROJECT, RECOMMENDATIONS, RECOMMENDATIONS_INTRO, type RefKey,
 } from '../data/research';
 
 /* ------------------------------------------------------------------ F */
@@ -517,11 +517,49 @@ export function Conclusion() {
         {CONCLUSION.map((p, i) => (
           <Reveal key={i} delay={i * 0.08}>
             <p className={i === 0 ? 'text-[1.1rem] leading-relaxed text-sand' : 'text-[1rem] leading-relaxed text-sand/90'}>
-              {p}
+              <Sentences items={p} />
             </p>
           </Reveal>
         ))}
       </div>
+
+      {/* Recommendations: every stakeholder named is a proposed implementer only. */}
+      <div className="mt-14">
+        <Reveal>
+          <div className="eyebrow">Recommendations</div>
+          <p className="t-lede mt-4">{RECOMMENDATIONS_INTRO}</p>
+        </Reveal>
+        <ol className="mt-8 space-y-4">
+          {RECOMMENDATIONS.map((r, i) => (
+            <Reveal key={r.action} as="li" delay={i * 0.04}>
+              <div className="card p-6 sm:p-7">
+                <div className="flex items-start gap-4">
+                  <span aria-hidden className="font-mono text-[0.78rem] font-medium text-cyan-300/80 pt-1 shrink-0">
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="font-display text-[1.08rem] font-semibold leading-snug text-sand">{r.action}</h3>
+                    <dl className="mt-4 grid gap-x-8 gap-y-4 md:grid-cols-2">
+                      {([
+                        ['Responsible', r.who],
+                        ['Expected benefit', r.benefit],
+                        ['Evidence', <Sentences key="e" items={r.evidence} />],
+                        ['Consideration', r.consideration],
+                      ] as const).map(([k, v]) => (
+                        <div key={k}>
+                          <dt className="mlabel text-mute">{k}</dt>
+                          <dd className="mt-1 text-[0.9rem] leading-relaxed text-sand/90">{v}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  </div>
+                </div>
+              </div>
+            </Reveal>
+          ))}
+        </ol>
+      </div>
+
       <Reveal>
         <div className="mt-12 card p-7 border-cyan-500/30 bg-cyan-500/[0.04]">
           <div className="eyebrow">Position restated</div>

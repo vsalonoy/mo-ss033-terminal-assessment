@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Section, Reveal, Cite, Chip, Caveat } from './primitives';
+import { Section, Reveal, Cite, Chip, Caveat, Sentences } from './primitives';
 import { usePrefersReducedMotion } from '../hooks/useSiteState';
 import { BarsH, WageTrajectory, ProportionRing } from './viz';
 import { EvidenceCards } from './Evidence';
 import {
   PROJECT, AUDIENCE, EXPOSURE_BY_REGION, EXPOSURE_NOTES, EXPOSURE_VS_ASEAN, STAKEHOLDERS, STAKEHOLDER_LIMIT,
   SOLUTIONS, RANKED, CRITERIA, CRITERIA_PROVENANCE, RANKING_NOTE, SG_OUTCOMES, SG_CAVEAT,
-  SG_WAGE_TRAJECTORY, SKILLSFUTURE_TAKEUP,
+  SG_WAGE_TRAJECTORY, SKILLSFUTURE_TAKEUP, GLOBALIZATION, ADOPTION_CAUSES,
 } from '../data/research';
 
 /* ------------------------------------------------------------------ A */
@@ -39,6 +39,14 @@ export function Intro() {
           </dl>
         </Reveal>
       </div>
+      <Reveal>
+        <div className="mt-12">
+          <div className="eyebrow">{GLOBALIZATION.heading}</div>
+          <p className="mt-4 prose-r">
+            <Sentences items={GLOBALIZATION.sentences} />
+          </p>
+        </div>
+      </Reveal>
       <Reveal>
         <div className="mt-12">
           <div className="eyebrow">Who this is written for</div>
@@ -90,6 +98,10 @@ export function Challenge() {
       <div className="grid lg:grid-cols-2 gap-10 items-start">
         <Reveal>
           <div className="space-y-5 prose-r">
+            <p>
+              <strong className="font-semibold text-sand">{ADOPTION_CAUSES.heading}.</strong>{' '}
+              <Sentences items={ADOPTION_CAUSES.sentences} />
+            </p>
             <p>
               The ILO estimates that 12.7 million Filipino workers, more than one quarter of
               employment, are in occupations exposed to generative AI. That is the highest exposure

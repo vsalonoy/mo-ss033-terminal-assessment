@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useId, useRef, useState, type MouseEvent, type ReactNode } from 'react';
+import { Fragment, useCallback, useEffect, useId, useRef, useState, type MouseEvent, type ReactNode } from 'react';
 import { motion, useInView, useMotionValue, animate } from 'motion/react';
 import { usePrefersReducedMotion, type CiteReturn } from '../hooks/useSiteState';
-import { refMap, type RefKey } from '../data/research';
+import { refMap, type RefKey, type Sentence } from '../data/research';
 
 /**
  * Scroll-triggered entrance. Collapses to a plain element when motion is reduced.
@@ -122,6 +122,20 @@ export function Cite({ keys }: { keys: RefKey[] }) {
       ))}
       )
     </span>
+  );
+}
+
+/* Sentences in order, each with its citation placed before the full stop, as APA 7 sets it. */
+export function Sentences({ items }: { items: Sentence[] }) {
+  return (
+    <>
+      {items.map((s, i) => (
+        <Fragment key={i}>
+          {i > 0 && ' '}
+          {s.t}{s.refs && <> <Cite keys={s.refs} /></>}.
+        </Fragment>
+      ))}
+    </>
   );
 }
 
