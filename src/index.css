@@ -1,39 +1,74 @@
-@import '@fontsource-variable/space-grotesk/wght.css';
 @import '@fontsource-variable/inter/wght.css';
-/* One weight. Plex Mono only sets small uppercase labels. */
+/* Headings only. The weight axis alone (latin, about 50 KB), not the optical-size file. */
+@import '@fontsource-variable/source-serif-4/wght.css';
+/* One weight. Plex Mono only sets timecodes. */
 @import '@fontsource/ibm-plex-mono/500.css';
 
-/* Arial resized to Space Grotesk's measurements, so text set before the web font
-   arrives already occupies the same space and nothing moves when it swaps in.
-   Without this the hero headline rewrapped on swap and load CLS reached 0.13.
-   Space Grotesk barely widens with weight but Arial does, so the regular and bold
-   ranges are matched separately. Bold needs Arial's real bold face because
-   synthetic bold is switched off. */
+/* Georgia stands in for Source Serif 4 until it arrives, scaled to roughly the same
+   width so a heading does not rewrap much when the web font swaps in. */
 @font-face {
-  font-family: 'Space Grotesk Fallback';
-  src: local('Arial'), local('ArialMT');
-  font-weight: 300 500;
-  size-adjust: 108.3%;
-  ascent-override: 90.5%;
-  descent-override: 26.8%;
-  line-gap-override: 0%;
-}
-@font-face {
-  font-family: 'Space Grotesk Fallback';
-  src: local('Arial Bold'), local('Arial-BoldMT');
-  font-weight: 600 800;
-  size-adjust: 101.2%;
-  ascent-override: 96.8%;
-  descent-override: 28.7%;
-  line-gap-override: 0%;
+  font-family: 'Source Serif Fallback';
+  src: local('Georgia');
+  size-adjust: 96%;
 }
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Two rooms, one set of tokens (see tailwind.config.js).
+ *
+ * The reading room (Home, Explore, Sources) is warm paper with ink text. The
+ * theatre (Watch) re-sets the same tokens to a dark stage under .theme-stage.
+ * Every text pair below was measured against its background for WCAG AA, with
+ * headroom for the alpha variants the components use (for example text-mute/80).
+ */
 @layer base {
-  :root { color-scheme: dark; }
+  :root {
+    color-scheme: light;
+    --ink-950: 11 15 20;      /* the stage; also any backing laid over a photograph */
+    --ink-900: 246 244 239;   /* paper */
+    --ink-800: 239 236 229;   /* paper, second band */
+    --ink-700: 255 255 255;   /* panels */
+    --ink-600: 242 239 233;   /* row hover, inset */
+    --ink-500: 230 226 217;
+    --line: 214 208 196;      /* rules and panel edges */
+    --sand: 21 25 31;         /* ink: 16.1:1 on paper */
+    --mute: 79 87 101;        /* secondary text: 6.9:1 on paper, 5.1:1 at 80% */
+    --cyan-200: 8 84 80;      /* evidence, links, focus: teal */
+    --cyan-300: 11 110 105;   /* 5.5:1 on paper */
+    --cyan-400: 13 118 112;
+    --cyan-500: 11 110 105;
+    --cyan-600: 9 89 85;
+    --iris: 75 90 134;        /* second chart series */
+    --amber: 138 83 0;        /* proposed: 5.4:1 */
+    --rose: 162 59 44;        /* limits: 5.3:1 */
+    --on-accent: 255 255 255;
+  }
+
+  .theme-stage {
+    color-scheme: dark;
+    --ink-950: 3 7 12;
+    --ink-900: 11 15 20;
+    --ink-800: 16 21 28;
+    --ink-700: 21 27 35;
+    --ink-600: 29 36 46;
+    --ink-500: 40 48 60;
+    --line: 46 56 69;
+    --sand: 237 239 242;      /* 16.7:1 on the stage */
+    --mute: 163 173 186;      /* 8.5:1 */
+    --cyan-200: 165 230 224;
+    --cyan-300: 111 208 200;  /* 10.6:1 */
+    --cyan-400: 111 208 200;
+    --cyan-500: 111 208 200;
+    --cyan-600: 70 170 162;
+    --iris: 165 180 252;
+    --amber: 230 169 76;
+    --rose: 236 140 125;
+    --on-accent: 11 15 20;
+  }
+
   html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
 
   /* One global switch. Anything decorative stops; nothing becomes unreadable. */
@@ -51,117 +86,141 @@
     @apply bg-ink-900 font-sans text-body text-sand antialiased;
     font-synthesis: none;
     text-rendering: optimizeLegibility;
-    /* The page tint lives in the fixed AmbientBlooms layer instead of here.
-       A background-attachment:fixed gradient on body repaints the whole
-       viewport on every scroll frame. */
   }
+  /* The theatre paints the whole window, including overscroll. */
+  body:has(.stage-room) { background: rgb(11 15 20); }
+
+  h1, h2, h3 { font-family: theme('fontFamily.serif'); }
 
   /* Inter's tabular figures keep counters and tables from shifting width. */
   .tabular-nums, table, .stat-figure { font-variant-numeric: tabular-nums; }
 
   :focus-visible {
-    outline: 2px solid theme('colors.cyan.400');
+    outline: 2px solid rgb(var(--cyan-400));
     outline-offset: 3px;
     border-radius: 3px;
   }
 
-  ::selection { background: rgba(34,211,238,0.26); color: #fff; }
+  ::selection { background: rgb(var(--cyan-300) / 0.22); }
 
   /* Charts draw their own focus ring; the default outline clips inside SVG. */
   svg :focus-visible { outline: none; }
 }
 
 @layer components {
-  .wrap { @apply mx-auto w-full max-w-[1200px] px-5 sm:px-8; }
+  .wrap { @apply mx-auto w-full max-w-page px-4 sm:px-8; }
 
   /* ---------- type roles ---------- */
-  .t-hero  { @apply font-display text-hero text-white; }
-  .t-sec   { @apply font-display text-sec text-white; }
-  .t-sub   { @apply font-display text-sub text-sand; }
+  .t-hero  { @apply font-serif text-hero text-sand; }
+  .t-sec   { @apply font-serif text-sec text-sand; }
+  .t-sub   { @apply font-serif text-sub text-sand; }
   .t-lede  { @apply font-sans text-lede text-mute max-w-reading; }
   .t-body  { @apply font-sans text-body text-sand/90; }
   .t-small { @apply font-sans text-small text-sand/85; }
   .t-micro { @apply font-sans text-micro text-mute; }
-  .t-stat  { @apply font-display text-stat stat-figure; }
-  .t-label { @apply font-mono text-label font-medium tracking-[0.08em] uppercase text-cyan-300; }
-  .prose-r { @apply max-w-reading text-body text-sand/85; }
+  .t-stat  { @apply font-serif text-stat stat-figure; }
+  .t-label { @apply font-sans text-label uppercase text-cyan-300; }
+  .prose-r { @apply max-w-reading text-body text-sand/90; }
 
-  /* Small uppercase metadata inside cards, tables and panels. Colour is set where used.
-     Monospace letters are already evenly spaced, so it needs less tracking than a sans. */
-  .mlabel { @apply font-mono text-[0.66rem] font-medium uppercase tracking-[0.08em]; }
+  /* Small uppercase metadata inside panels and tables. Colour is set where used. */
+  .mlabel { @apply font-sans text-[0.75rem] font-semibold uppercase tracking-[0.08em]; }
 
-  .eyebrow {
-    @apply font-mono text-label font-medium tracking-[0.08em] uppercase text-cyan-300 flex items-center gap-2.5;
-  }
-  .eyebrow::before {
-    content: '';
-    @apply inline-block h-px w-6 bg-cyan-400/60 shrink-0;
-  }
+  /* A kicker above a heading. Plain sans small caps, no rule or icon before it. */
+  .eyebrow { @apply font-sans text-label uppercase text-cyan-300; }
 
   /* ---------- surfaces ---------- */
+  /* A white panel on paper: one hairline, a soft radius, almost no shadow. */
   .card {
-    /* No backdrop-filter here. There are roughly forty cards, and the ambient
-       canvas behind them repaints every frame, so a backdrop blur on each one
-       forces the whole stack to re-sample and re-blur on every scroll frame.
-       A slightly more opaque fill gives the same separation for free. */
-    @apply rounded-xl border border-edge bg-ink-700/80;
-    /* A faint lit top edge and a soft lift off the page. Both are static, so they
-       cost nothing per frame. */
-    background-image: linear-gradient(180deg, rgba(255,255,255,0.022), rgba(255,255,255,0) 42%);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.045), 0 12px 32px -20px rgba(0,0,0,0.7);
-    transition-property: border-color, background-color, transform, box-shadow;
-    transition-duration: .3s;
+    @apply rounded-[14px] border border-line bg-ink-700;
+    box-shadow: 0 1px 2px rgb(21 25 31 / 0.04);
+    transition-property: border-color, background-color, box-shadow;
+    transition-duration: .2s;
     transition-timing-function: theme('transitionTimingFunction.soft');
   }
+  .theme-stage .card { box-shadow: none; }
 
-  /* Hover treatment, reserved for cards that do something when clicked.
-     A card that is a button lifts; an accordion card only lights its edge, because
-     lifting a panel that may be hundreds of pixels tall reads as the page moving.
-     Transform and box-shadow do not affect layout, so nothing around it shifts.
-     Touch screens get none of it: a tap would leave the hover state stuck on. */
+  /* Hover is reserved for panels that do something when clicked: the edge darkens.
+     Nothing lifts or moves. Touch screens get none of it. */
   @media (hover: hover) {
-    .card-action:hover {
-      @apply border-accent-bright/30;
-      transform: translateY(-2px);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 14px 32px -18px rgba(52,209,212,0.32);
-    }
-    .card-toggle:has(> button:hover) {
-      @apply border-accent-bright/30;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 14px 32px -20px rgba(52,209,212,0.24);
+    .card-action:hover, .card-toggle:has(> button:hover) {
+      @apply border-cyan-500/60;
+      box-shadow: 0 2px 10px -4px rgb(11 110 105 / 0.18);
     }
   }
-  /* Keyboard focus gets the same edge, alongside the global focus outline. */
-  .card-action:focus-visible, .card-toggle:has(> button:focus-visible) { @apply border-accent-bright/45; }
-  @media (prefers-reduced-motion: reduce) {
-    .card-action:hover { transform: none; }
-  }
+  .card-action:focus-visible, .card-toggle:has(> button:focus-visible) { @apply border-cyan-500/70; }
 
   .chip {
-    @apply inline-flex items-center rounded-full border px-2.5 py-0.5 font-display text-[0.68rem] font-semibold tracking-wide;
+    @apply inline-flex items-center rounded-full border px-2.5 py-0.5 font-sans text-[0.78rem] font-semibold;
   }
 
-  .cite { @apply font-sans text-[0.74rem] text-cyan-300/75 tracking-tight; }
+  .cite { @apply font-sans text-[0.82rem] text-cyan-300; }
 
-  .rule { @apply h-px w-full bg-gradient-to-r from-transparent via-line to-transparent; }
+  .rule { @apply h-px w-full bg-line; }
 
   /* ---------- controls ---------- */
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5
-           font-display text-[0.86rem] font-semibold tracking-tight
-           transition-all duration-200 ease-soft disabled:opacity-40 disabled:pointer-events-none;
+    @apply inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full px-5 py-2.5
+           font-sans text-[0.9rem] font-semibold
+           transition-colors duration-200 ease-soft disabled:opacity-40 disabled:pointer-events-none;
   }
-  .btn-p { @apply bg-cyan-400 text-ink-950 hover:bg-cyan-300 hover:shadow-[0_0_28px_-6px_rgba(34,211,238,0.55)]; }
-  .btn-g { @apply border border-line text-sand hover:border-cyan-500/45 hover:text-cyan-200 hover:bg-cyan-500/[0.06]; }
+  .btn-p { @apply bg-cyan-500 text-[rgb(var(--on-accent))] hover:bg-cyan-600; }
+  .btn-g { @apply border border-line bg-ink-700 text-sand hover:border-cyan-500/70 hover:text-cyan-200; }
 
-  /* ---------- the scroll progress line under the top bar ---------- */
-  .progress-line { @apply h-px w-full origin-left bg-gradient-to-r from-cyan-500 via-cyan-300 to-iris-400; }
+  /* A text link inside running prose. */
+  .link { @apply text-cyan-300 underline decoration-cyan-300/40 underline-offset-2 hover:decoration-cyan-300; }
+
+  /* ---------- photographs ---------- */
+  @media (min-width: 1280px) {
+    .bleed {
+      position: relative;
+      left: 50%;
+      width: min(calc(100vw - 4rem), var(--bleed-max, 1520px));
+      transform: translateX(-50%);
+    }
+  }
+
+  /* Enlarged photograph. A native modal dialog: focus is held inside it, Escape
+     closes it, and the page behind is inert. Always dark, like the theatre. */
+  .lightbox {
+    @apply m-0 h-full max-h-none w-full max-w-none bg-transparent p-0;
+  }
+  .lightbox::backdrop { background: rgba(3, 7, 12, 0.92); }
+  @media (prefers-reduced-motion: no-preference) {
+    .lightbox[open] { animation: lightbox-in .22s theme('transitionTimingFunction.soft'); }
+  }
+  @keyframes lightbox-in { from { opacity: 0; } to { opacity: 1; } }
+
+  /* Carousel arrows: at least 44 px, on a solid dark backing so they stay visible over any photograph. */
+  .carousel-btn {
+    @apply absolute top-1/2 -translate-y-1/2 grid h-11 w-11 place-items-center rounded-full
+           border border-white/25 bg-[rgb(11_15_20/0.78)] text-[1.4rem] leading-none text-white
+           hover:border-white/60;
+  }
+
+  .progress-line { @apply h-0.5 w-full origin-left bg-cyan-500; }
 }
 
 @layer utilities {
-  /* Used by the ambient layer and the hero so decoration never catches a click. */
   .inert { pointer-events: none; user-select: none; }
-  .grid-fade {
-    -webkit-mask-image: linear-gradient(to bottom, transparent, black 12%, black 88%, transparent);
-            mask-image: linear-gradient(to bottom, transparent, black 12%, black 88%, transparent);
-  }
+}
+
+/* Video captions: a solid backing keeps them readable over bright photographs. */
+#presentation video::cue {
+  background: rgba(3, 7, 17, 0.86);
+  color: #fff;
+}
+
+/*
+ * Print, for an academic reviewer working on paper: every folded panel and every
+ * tab panel opens, navigation and the theatre are left out, and links show where
+ * they go only for the reference list.
+ */
+@media print {
+  :root { --ink-900: 255 255 255; }
+  body { background: #fff; }
+  .no-print, [data-no-print] { display: none !important; }
+  [data-print-open][hidden] { display: block !important; }
+  .card { box-shadow: none; break-inside: avoid; }
+  section { break-inside: auto; }
+  a { text-decoration: none; }
 }

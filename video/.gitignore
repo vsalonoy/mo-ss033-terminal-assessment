@@ -1,0 +1,7 @@
+# Heavy local tooling: never committed.
+node_modules/
+tts/.venv/
+tts/models/
+out/
+public/audio/
+public/fonts/

@@ -1,0 +1,29 @@
+{
+  "name": "mo-ss033-video-explainer",
+  "private": true,
+  "type": "module",
+  "description": "Optional video explainer for the MO-SS033 Terminal Assessment website. Separate from the website build.",
+  "scripts": {
+    "assets": "node scripts/assets.ts",
+    "check": "node scripts/check-script.ts && node scripts/check-screen.ts",
+    "narration:export": "node scripts/export-narration.ts",
+    "narration:tts": "tts/.venv/bin/python tts/narrate.py --voice af_heart --speed 1.0",
+    "narration:pauses": "tts/.venv/bin/python tts/pauses.py",
+    "narration:verify": "tts/.venv/bin/python tts/verify_speech.py base.en",
+    "captions": "node scripts/captions.ts",
+    "produce": "npm run check && npm run narration:export && npm run narration:tts && npm run narration:pauses && npm run narration:verify && npm run captions",
+    "studio": "remotion studio src/index.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.539",
+    "@remotion/fonts": "4.0.539",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "remotion": "4.0.539"
+  },
+  "devDependencies": {
+    "@types/react": "^19.3.0",
+    "typescript": "~6.0.3"
+  }
+}

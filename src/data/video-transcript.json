@@ -1,0 +1,60 @@
+[
+ {
+  "title": "Introduction",
+  "paragraphs": [
+   "Technology is changing the way people work around the world, and the Philippines is no exception. As automation and artificial intelligence become more common, Filipino workers face both new opportunities and challenges.",
+   "I’m Vanessa Salonoy, and this research examines how workplace automation affects Filipino workers, compares five possible responses, and evaluates one proposed solution to help workers transition into new roles.",
+   "Through published evidence, a worked example and measurable criteria, I’ll explain why career conversion deserves consideration and how its success could be evaluated in the Philippines."
+  ]
+ },
+ {
+  "title": "1. Globalization and the problem",
+  "paragraphs": [
+   "My research looks at technology as a driver of globalization, reaching Filipino workers through the global trade in services. The IT and business process management industry, or IT-BPM, has helped make the Philippines a global outsourcing hub, and international clients increasingly expect providers to use AI to cut costs and raise productivity.",
+   "An International Labour Organization study estimates that 12.7 million Filipino workers, more than a quarter of employment, are in occupations exposed to generative AI. Exposure means some tasks could be automated, not that the job is lost. Only 3.6 percent of jobs fall in the highest displacement risk category.",
+   "The change is also uneven. Women face roughly double the exposure of men, young workers are more often in occupations at greater displacement risk, and around two in five jobs in the National Capital Region are exposed. And while training is funded, I found no scheme that replaces a mid-career worker’s income while they retrain.",
+   "So my position is that automation should continue, but with support built into the transition, not offered after workers have already lost ground."
+  ]
+ },
+ {
+  "title": "2. Determining the solution",
+  "paragraphs": [
+   "To find a response, I compared five alternatives: two Philippine programmes, national reskilling and JobStart, and three from Singapore: job redesign, training credits and place-and-train career conversion. At this Determining Solution stage, I judged each one on four criteria I selected: sustainability, impact, feasibility and effectiveness. I placed the greatest emphasis on effectiveness in my final judgement, because my question is whether workers are actually supported, although I did not assign numerical weights or scores.",
+   "Place-and-train career conversion ranked first. It is the only alternative with a published control-group evaluation, and the only one that keeps workers earning while their role changes. Its limitation here is feasibility, because I found no Philippine funding line for conversion. National reskilling ranked second: the most feasible starting point, but with no published results yet. JobStart ranked third because it only serves 18 to 24 year olds with less than a year of work experience. Job redesign and training credits ranked lower, mainly on feasibility. For these four, effectiveness is not shown, which means I found no published outcome evaluation, not that they failed.",
+   "Three things must stay separate. Singapore’s existing programme hires a jobseeker into a new growth role first, then trains them on the job or through industry-recognised training.",
+   "Its published evaluation found that, compared with control groups, participants earned 2.5 percent more in the placement year and 5.8 to 6.5 percent more over the next four years, with retention 3.9 percentage points higher. These are Singapore results only.",
+   "My proposal is a Philippine adaptation of that model, which does not exist yet."
+  ]
+ },
+ {
+  "title": "3. How the proposed solution works",
+  "paragraphs": [
+   "Here is how it would work for Maria, a hypothetical contact centre agent. Parts of her role are automated, but her job is not removed.",
+   "Her employer refers her to the local Public Employment Service Office, or PESO, which assesses her against roles in demand. A participating employer then hires her into a new role before she is fully trained, and trains her, alone or with a training provider, under Republic Act 12063, the enterprise-based training law, which already covers employed workers. A proposed training allowance would keep her earning, and her completion, retention and wage change would be recorded.",
+   "The Department of Labor and Employment and the PESOs would deliver the track, TESDA would register the training, and the ICT department and the IT-BPM industry association would identify growth roles. None of them has been approached, and no budget has been allocated."
+  ]
+ },
+ {
+  "title": "4. Evaluating success",
+  "paragraphs": [
+   "Now the most important question: how success would be evaluated. The four Evaluating Success criteria share their names with my comparison criteria, but here they test my own proposal. Every target I mention is a planning target I set, not a result.",
+   "Sustainability asks whether the solution could stay viable and keep benefiting workers. I rate it moderate to high, because it would run on existing systems: the enterprise-based training law and the PESOs that deliver JobStart. The weakness is funding, as the 740 million peso IT-BPM commitment covers only three years. My SMART indicators do not include a dedicated sustainability measure. Retention at twelve months is only a proxy for lasting outcomes, so continued funding and employer participation would be judged qualitatively.",
+   "Impact asks what workers would gain. I rate it high in principle, but narrow at first: workers keep an income while they convert. It would be assessed by wage change, with no real wage decrease for at least 80 percent of completers, by whether places reach the most exposed groups, and by a worker survey setting a first baseline. But a first cohort would reach only a small fraction of the 12.7 million exposed workers.",
+   "Feasibility asks what implementation would need in the Philippines. I rate it moderate. Employed workers are already eligible for enterprise-based training, and employers with registered programmes can claim an additional tax deduction. Still missing are an income-support rule for mid-career trainees and a way to match displaced workers to new roles. Employer participation would be the test, with a target of 30 firms in the first year, because the model depends on employers hiring first, and none has agreed to that yet.",
+   "Effectiveness asks whether the programme would achieve its intended outcomes. It is not yet shown here, because the gains so far are Singapore results. A Philippine pilot would be judged against its own targets: 75 percent of a first cohort completing the cycle, 70 percent still in the new role six months after completing it, and wage change against previous pay. Completion is not employment, and with no Philippine baseline, the first cohort would set one.",
+   "In short, effectiveness and impact have direct indicators, feasibility has one, and sustainability is assessed qualitatively, with one proxy."
+  ]
+ },
+ {
+  "title": "5. Conclusion",
+  "paragraphs": [
+   "To conclude, automation is changing Filipino jobs more than removing them, but unevenly. I selected a Philippine adaptation of Singapore’s place-and-train model because it has the strongest evidence of the five and keeps workers earning while they retrain. It would build on the training laws, employer incentives and employment offices the Philippines already has, adding what I did not find: employer-linked career conversion with income support for mid-career workers. Its success would be judged against the four criteria and the SMART measures, not assumed."
+  ]
+ },
+ {
+  "title": "Closing",
+  "paragraphs": [
+   "The full research, its sources and its limitations are on the website."
+  ]
+ }
+]

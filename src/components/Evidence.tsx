@@ -30,7 +30,7 @@ function Card({ e }: { e: Evidence }) {
           <span className="block text-[0.92rem] leading-snug text-sand">{e.claim}</span>
           <span className="mt-1.5 flex flex-wrap items-center gap-2">
             <Chip tone={sgOnly ? 'amber' : 'neutral'}>{e.scope}</Chip>
-            <span className="text-[0.76rem] text-mute">{r.author.replace(/,.*$/, '')}, {r.year.split(',')[0]}</span>
+            <span className="text-[0.875rem] text-mute">{r.author.replace(/,.*$/, '')}, {r.year.split(',')[0]}</span>
           </span>
         </span>
       </button>
@@ -47,23 +47,31 @@ function Card({ e }: { e: Evidence }) {
             <dl className="px-5 pb-5 pt-1 space-y-3 border-t border-line/60">
               <div>
                 <dt className="mlabel text-mute">What the source says</dt>
-                <dd className="mt-1 text-[0.86rem] leading-relaxed text-sand/90">{e.finding}</dd>
+                <dd className="mt-1 text-[0.875rem] leading-relaxed text-sand/90">{e.finding}</dd>
               </div>
+              {e.note && (
+                <div>
+                  <dt className="mlabel text-mute">Compared with other figures</dt>
+                  <dd className="mt-1 text-[0.875rem] leading-relaxed text-sand/90">
+                    {e.note.t} {e.note.refs && <Cite keys={e.note.refs} />}
+                  </dd>
+                </div>
+              )}
               <div className="grid sm:grid-cols-2 gap-3">
                 <div>
                   <dt className="mlabel text-mute">Published by</dt>
-                  <dd className="mt-1 text-[0.84rem] leading-snug text-sand/90">{r.author}</dd>
+                  <dd className="mt-1 text-[0.875rem] leading-snug text-sand/90">{r.author}</dd>
                 </div>
                 <div>
                   <dt className="mlabel text-mute">Date</dt>
-                  <dd className="mt-1 text-[0.84rem] leading-snug text-sand/90">{r.year}</dd>
+                  <dd className="mt-1 text-[0.875rem] leading-snug text-sand/90">{r.year}</dd>
                 </div>
               </div>
               <div>
                 <dt className="mlabel text-mute">Source</dt>
                 <dd className="mt-1">
                   <a href={r.url} target="_blank" rel="noopener noreferrer"
-                    className="text-[0.84rem] leading-snug text-cyan-300 underline decoration-cyan-500/40 underline-offset-2 [overflow-wrap:anywhere] hover:decoration-cyan-300">
+                    className="text-[0.875rem] leading-snug text-cyan-300 underline decoration-cyan-500/40 underline-offset-2 [overflow-wrap:anywhere] hover:decoration-cyan-300">
                     {r.title}
                   </a>
                 </dd>
@@ -91,7 +99,7 @@ export function EvidenceCards({ section, title = 'Check the evidence' }:
       {/* Sections D and E carry a single card each. A one-item two-column grid
           leaves a conspicuous empty half, so the grid only splits when there is
           something to put in the second column. */}
-      <div className={`mt-5 grid gap-3 ${items.length > 1 ? 'md:grid-cols-2' : ''}`}>
+      <div className={`mt-5 grid items-start gap-3 ${items.length > 1 ? 'md:grid-cols-2' : ''}`}>
         {items.map(e => <Card key={e.id} e={e} />)}
       </div>
     </div>
@@ -133,7 +141,7 @@ export function ImplementationMap({ heading = true }: { heading?: boolean } = {}
               <span className="font-display text-[1.1rem] font-extrabold text-cyan-300/55">{si + 1}</span>
               <span className="font-display text-[0.95rem] font-bold text-sand">{st.label}</span>
             </div>
-            <p className="mt-1.5 text-[0.78rem] leading-snug text-mute">{st.note}</p>
+            <p className="mt-1.5 text-[0.875rem] leading-snug text-mute">{st.note}</p>
             <ul className="mt-4 space-y-1.5">
               {IMPL_ACTORS.filter(a => (a.stages as readonly string[]).includes(st.key)).map(a => {
                 const on = active === a.id;
@@ -143,12 +151,12 @@ export function ImplementationMap({ heading = true }: { heading?: boolean } = {}
                       type="button"
                       onClick={() => setActive(on ? null : a.id)}
                       aria-pressed={on}
-                      className={`w-full text-left rounded px-2.5 py-1.5 text-[0.82rem] leading-snug transition-colors ${
+                      className={`w-full text-left rounded px-2.5 py-1.5 text-[0.875rem] leading-snug transition-colors ${
                         on ? 'bg-cyan-500/15 text-cyan-200' : 'text-sand/85 hover:bg-ink-600/60 hover:text-sand'}`}
                     >
                       {a.short}
                       {a.statutory === null && (
-                        <span className="ml-1.5 text-[0.68rem] text-amber/90">proposed role only</span>
+                        <span className="ml-1.5 text-[0.75rem] text-amber/90">proposed role only</span>
                       )}
                     </button>
                   </li>
@@ -170,7 +178,7 @@ export function ImplementationMap({ heading = true }: { heading?: boolean } = {}
             className="card p-6 border-cyan-500/30"
           >
             <div className="flex flex-wrap items-center gap-2.5">
-              <h4 className="font-display text-[1.02rem] font-bold text-sand">{actor.name}</h4>
+              <h4 className="font-serif text-[1.02rem] font-bold text-sand">{actor.name}</h4>
               {actor.stages.map(st => (
                 <Chip key={st} tone="cyan">
                   {IMPL_STAGES.find(x => x.key === st)?.label}

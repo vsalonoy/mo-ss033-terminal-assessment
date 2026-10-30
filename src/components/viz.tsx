@@ -1,6 +1,7 @@
 import { useId, useRef, useState, type ReactNode } from 'react';
 import { motion, useInView } from 'motion/react';
 import { usePrefersReducedMotion } from '../hooks/useSiteState';
+import { useTabs } from '../hooks/useTabs';
 
 /**
  * Hand-built SVG visualisations.
@@ -87,12 +88,12 @@ export function BarsH({ data, max, unit = '%', activeIndex, onActive }:
                 <span className={`text-small transition-colors ${on ? 'text-cyan-200' : 'text-sand/90'}`}>
                   {d.name}
                 </span>
-                <span className={`font-display text-[0.95rem] font-bold tabular-nums transition-colors ${
+                <span className={`font-sans text-[0.98rem] font-semibold tabular-nums transition-colors ${
                   on ? 'text-cyan-200' : tone === 'amber' ? 'text-amber' : 'text-cyan-300'}`}>
                   {d.floor ? '>' : ''}{d.value}{d.unit ?? unit}
                 </span>
               </span>
-              <span className="mt-1.5 block h-2.5 w-full rounded-full bg-ink-600/70 overflow-hidden">
+              <span className="mt-1.5 block h-2.5 w-full rounded-full bg-ink-600 overflow-hidden">
                 <motion.span
                   className={`block h-full rounded-full ${
                     tone === 'amber' ? 'bg-amber' : tone === 'iris' ? 'bg-iris-400' : 'bg-cyan-400'}`}
@@ -115,8 +116,8 @@ export function BarsH({ data, max, unit = '%', activeIndex, onActive }:
         {ticks.map((t, i) => (
           <g key={i}>
             <line x1={(t / max) * W} x2={(t / max) * W} y1="0" y2="2"
-              stroke="rgba(148,180,210,0.25)" strokeWidth="0.3" />
-            <text x={(t / max) * W} y="5.6" fontSize="3.4" fill="#8FA6BF"
+              stroke="rgb(var(--line))" strokeWidth="0.3" />
+            <text x={(t / max) * W} y="5.6" fontSize="3.4" fill="rgb(var(--mute))"
               textAnchor={i === 0 ? 'start' : i === ticks.length - 1 ? 'end' : 'middle'}>
               {t}{unit}
             </text>
@@ -140,119 +141,132 @@ export function BarsH({ data, max, unit = '%', activeIndex, onActive }:
   );
 }
 
-/* --------------------------------------------------- progressive line draw */
+/* ----------------------------------------------------- evidence explorer */
+/** One measured effect against a control group: a single figure or a reported range. */
+export interface Measure {
+  key: string;
+  label: string;
+  /** The period measured, as the source reports it. Left out where the source data gives none. */
+  period?: string;
+  unit: '%' | 'pp';
+  value?: number;
+  low?: number; high?: number;
+  /** The plain reading of the figure. */
+  meaning: string;
+  /** A caution about how the figure may be read, if any. */
+  caution?: string;
+}
+
+const unitWord = (u: Measure['unit']) => (u === 'pp' ? 'percentage points' : 'percent');
+const shown = (m: Measure) => m.value !== undefined
+  ? `${m.value}${m.unit === 'pp' ? ' pp' : m.unit}`
+  : `${m.low}${m.unit} to ${m.high}${m.unit}`;
+const spoken = (m: Measure) => m.value !== undefined
+  ? `${m.value} ${unitWord(m.unit)}`
+  : `between ${m.low} and ${m.high} ${unitWord(m.unit)}`;
+
 /**
- * The Singapore wage effect. A flat segment for the placement year, then a
- * shaded band for the four years after it, because the source reports a range
- * for that period rather than a yearly series. The path draws itself in.
+ * Measured effects, each selectable, with the selected one explained beside them.
+ *
+ * Each effect is drawn from a zero line that stands for the control group, so
+ * every mark reads as "this much above the comparison". A single figure is a
+ * dot; a reported range is a bracketed band with both ends labelled, never a
+ * line, so nothing is implied between or beyond what was measured. Measures in
+ * percentage points sit on their own scale under their own heading, so they are
+ * never read against the percentages. Every value is printed as text, so none
+ * of this depends on colour, hover or animation.
  */
-export function WageTrajectory({ placement, after, axisMax, unit }:
-  { placement: { label: string; value: number }; after: { label: string; low: number; high: number };
-    axisMax: number; unit: string }) {
-  const { ref, play, reduced } = useEnter<SVGSVGElement>();
-  const [hover, setHover] = useState<'p' | 'a' | null>(null);
-
-  const W = 320, H = 170, PL = 40, PR = 14, PT = 14, PB = 32;
-  const iw = W - PL - PR, ih = H - PT - PB;
-  const y = (v: number) => PT + ih - (v / axisMax) * ih;
-  const xA = PL, xB = PL + iw * 0.38, xC = PL + iw;
-
-  const bandTop = y(after.high), bandBot = y(after.low);
-  /* A 0.7 point range is only a few pixels tall, so the drawn band is padded to stay
-     legible as a band. The edge labels carry the actual reported numbers. */
-  const step = `M ${xA} ${y(placement.value)} L ${xB} ${y(placement.value)}`;
-  const riser = `M ${xB} ${y(placement.value)} L ${xB} ${(bandTop + bandBot) / 2}`;
-  const mid = `M ${xB} ${(bandTop + bandBot) / 2} L ${xC} ${(bandTop + bandBot) / 2}`;
-  const gridVals = [0, 2, 4, 6, 8].filter(v => v <= axisMax);
-
-  const dash = { strokeDasharray: 1, strokeDashoffset: 1, pathLength: 1 } as const;
+export function EvidenceExplorer({ groups, max, children }:
+  { groups: { heading: string; unit: Measure['unit']; measures: Measure[] }[]; max: number; children?: ReactNode }) {
+  const all = groups.flatMap(g => g.measures);
+  const [active, setActive] = useState(0);
+  const { tab, panel } = useTabs(all.length, active, setActive);
+  const sel = all[active];
+  const ticks = [0, max / 4, max / 2, (3 * max) / 4, max];
+  const x = (v: number) => `${(v / max) * 100}%`;
+  /* each group's first position in the single list of tabs */
+  const starts = groups.map((_, gi) => groups.slice(0, gi).reduce((n, g) => n + g.measures.length, 0));
 
   return (
-    <div>
-      <svg ref={ref} viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" role="img"
-        aria-label={`Wage effect against control groups. In the placement year, ${placement.value} percent. Over the next four years, between ${after.low} and ${after.high} percent, shown as a band because the source reports a range.`}>
-        <defs>
-          <linearGradient id="bandFill" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor="#22D3EE" stopOpacity="0.30" />
-            <stop offset="100%" stopColor="#22D3EE" stopOpacity="0.08" />
-          </linearGradient>
-        </defs>
-
-        {gridVals.map(v => (
-          <g key={v}>
-            <line x1={PL} x2={W - PR} y1={y(v)} y2={y(v)} stroke="rgba(148,180,210,0.12)" strokeWidth="1" />
-            <text x={PL - 8} y={y(v) + 4} fontSize="10" fill="#8FA6BF" textAnchor="end">{v}{unit}</text>
-          </g>
+    <div className="grid gap-6 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:gap-8 items-start">
+      <div role="tablist" aria-label="Measured effects" aria-orientation="vertical" className="space-y-6">
+        {groups.map((g, gi) => (
+          <div key={g.heading}>
+            <div className="flex items-baseline justify-between gap-3">
+              <div className="t-label">{g.heading}</div>
+              <div className="mlabel text-mute">Scale in {unitWord(g.unit)}</div>
+            </div>
+            <p className="t-micro mt-1">Zero is the control group. Each mark is the difference from it.</p>
+            <div className="mt-2 space-y-2">
+              {g.measures.map((m, mi) => {
+                const i = starts[gi] + mi;
+                const on = i === active;
+                const amber = m.unit === 'pp';
+                const mark = amber ? 'bg-amber' : 'bg-cyan-300';
+                return (
+                  <button key={m.key} {...tab(i)}
+                    className={`block w-full rounded-xl border px-4 py-3 text-left transition-colors ${
+                      on ? 'border-cyan-300/70 bg-cyan-500/[0.08] shadow-[inset_3px_0_0_rgb(var(--cyan-500))]'
+                         : 'border-edge bg-ink-700/60 hover:border-accent-bright/40'}`}>
+                    <span className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
+                      <span className={`text-[0.9rem] ${on ? 'text-cyan-200 font-semibold' : 'text-sand/90'}`}>{m.label}</span>
+                      <span className={`font-sans text-[1.02rem] font-semibold tabular-nums ${amber ? 'text-amber' : 'text-cyan-300'}`}>
+                        {shown(m)}
+                      </span>
+                    </span>
+                    {/* the mark, on the group's scale; zero is the control group */}
+                    <span aria-hidden className="relative mt-3 block h-5">
+                      <span className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-line" />
+                      <span className="absolute left-0 top-0 h-full w-px bg-sand/50" />
+                      {m.value !== undefined ? (
+                        <>
+                          <span className={`absolute top-1/2 h-0.5 -translate-y-1/2 ${amber ? 'bg-amber/60' : 'bg-cyan-300/60'}`}
+                            style={{ left: 0, width: x(m.value) }} />
+                          <span className={`absolute top-1/2 h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-ink-900 ${mark}`}
+                            style={{ left: x(m.value) }} />
+                        </>
+                      ) : (
+                        <>
+                          <span className="absolute top-1/2 h-px -translate-y-1/2 border-t border-dashed border-cyan-300/40"
+                            style={{ left: 0, width: x(m.low!) }} />
+                          <span className="absolute top-0 h-full rounded-[3px] border-x-2 border-cyan-200 bg-cyan-300/45"
+                            style={{ left: x(m.low!), width: `calc(${x(m.high! - m.low!)} + 2px)` }} />
+                        </>
+                      )}
+                    </span>
+                    <span aria-hidden className="relative mt-1 block h-4 text-[0.75rem] text-mute tabular-nums">
+                      {ticks.map((t, k) => (
+                        <span key={t} className="absolute"
+                          style={{ left: x(t), transform: k === 0 ? 'none' : k === ticks.length - 1 ? 'translateX(-100%)' : 'translateX(-50%)' }}>
+                          {k === 0 ? '0' : `${t}${g.unit === 'pp' ? '' : '%'}`}
+                        </span>
+                      ))}
+                    </span>
+                    <span className="sr-only">: {spoken(m)} above the control group{m.period ? `, ${m.period.toLowerCase()}` : ''}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         ))}
+      </div>
 
-        {/* the range band for the later period */}
-        <motion.rect
-          x={xB} y={bandTop} width={xC - xB} height={Math.max(9, bandBot - bandTop)}
-          fill="url(#bandFill)" stroke="rgba(34,211,238,0.45)" strokeWidth="1" rx="2"
-          initial={reduced ? false : { opacity: 0, scaleX: 0 }}
-          animate={{ opacity: play ? (hover === 'a' ? 1 : 0.9) : 0, scaleX: play ? 1 : 0 }}
-          style={{ transformOrigin: `${xB}px center` }}
-          transition={{ duration: reduced ? 0 : 0.7, delay: reduced ? 0 : 1.05, ease: [0.16, 1, 0.3, 1] }}
-        />
-
-        {/* the measured step, drawn progressively */}
-        {[step, riser, mid].map((d, i) => (
-          <motion.path
-            key={i} d={d} fill="none" stroke="#67E8F9" strokeWidth="2.4"
-            strokeLinecap="round" strokeDasharray={i === 1 ? '4 4' : undefined}
-            initial={reduced ? false : dash}
-            animate={play ? { pathLength: 1, strokeDashoffset: 0, opacity: 1 } : { pathLength: 0, opacity: 0 }}
-            transition={{ duration: reduced ? 0 : 0.6, delay: reduced ? 0 : 0.25 + i * 0.35, ease: 'easeInOut' }}
-          />
-        ))}
-
-        {/* measured points */}
-        <motion.circle cx={xA + 1} cy={y(placement.value)} r={hover === 'p' ? 6 : 4.5}
-          fill="#050B16" stroke="#67E8F9" strokeWidth="2.4"
-          initial={reduced ? false : { opacity: 0 }} animate={{ opacity: play ? 1 : 0 }}
-          transition={{ duration: 0.3, delay: reduced ? 0 : 0.5 }} />
-
-        {/* hit areas: hover, and tab order via tabIndex */}
-        <rect x={PL} y={PT} width={xB - PL} height={ih} fill="transparent"
-          tabIndex={0} role="button" aria-label={`${placement.label}: ${placement.value}${unit} above control groups`}
-          onMouseEnter={() => setHover('p')} onMouseLeave={() => setHover(null)}
-          onFocus={() => setHover('p')} onBlur={() => setHover(null)}
-          className="cursor-pointer outline-none" />
-        <rect x={xB} y={PT} width={xC - xB} height={ih} fill="transparent"
-          tabIndex={0} role="button" aria-label={`${after.label}: between ${after.low} and ${after.high}${unit} above control groups`}
-          onMouseEnter={() => setHover('a')} onMouseLeave={() => setHover(null)}
-          onFocus={() => setHover('a')} onBlur={() => setHover(null)}
-          className="cursor-pointer outline-none" />
-        {hover && (
-          <rect x={hover === 'p' ? PL : xB} y={PT} width={hover === 'p' ? xB - PL : xC - xB} height={ih}
-            fill="rgba(34,211,238,0.06)" stroke="rgba(34,211,238,0.35)" strokeWidth="1" rx="3" className="inert" />
-        )}
-
-        {/* The band's edges are the two reported numbers, so label them. */}
-        {([['high', after.high, bandTop - 4], ['low', after.low, bandBot + 10]] as const).map(([k, v, yy]) => (
-          <motion.text
-            key={k} x={xC - 4} y={yy} fontSize="10" fontWeight="600" fill="#A5F3FC" textAnchor="end"
-            initial={reduced ? false : { opacity: 0 }} animate={{ opacity: play ? 0.95 : 0 }}
-            transition={{ duration: 0.35, delay: reduced ? 0 : 1.5 }}
-          >{v}{unit}</motion.text>
-        ))}
-        <motion.text
-          x={xA + 7} y={y(placement.value) - 9} fontSize="10" fontWeight="600" fill="#A5F3FC" textAnchor="start"
-          initial={reduced ? false : { opacity: 0 }} animate={{ opacity: play ? 0.95 : 0 }}
-          transition={{ duration: 0.35, delay: reduced ? 0 : 0.75 }}
-        >{placement.value}{unit}</motion.text>
-
-        <text x={(PL + xB) / 2} y={H - 10} fontSize="10" fill={hover === 'p' ? '#A5F3FC' : '#8FA6BF'} textAnchor="middle">
-          {placement.label}
-        </text>
-        <text x={(xB + xC) / 2} y={H - 10} fontSize="10" fill={hover === 'a' ? '#A5F3FC' : '#8FA6BF'} textAnchor="middle">
-          {after.label}
-        </text>
-      </svg>
-
-      <div aria-live="polite" className="mt-2 min-h-[1.6rem]">
-        {hover === 'p' && <p className="t-micro">Placement year: {placement.value}{unit} above the control group.</p>}
-        {hover === 'a' && <p className="t-micro">The four years after: between {after.low}{unit} and {after.high}{unit}. The source gives a range, not a figure per year.</p>}
+      <div {...panel()} aria-live="polite"
+        className="rounded-xl border border-edge bg-ink-800/80 p-5 sm:p-6 lg:sticky lg:top-24 focus-visible:outline-offset-2">
+        <div className="mlabel text-mute">Selected measure</div>
+        <div className="mt-1 font-display text-[1.05rem] font-semibold text-sand">{sel.label}</div>
+        <div className={`mt-3 font-display text-[2rem] font-bold leading-none tabular-nums ${sel.unit === 'pp' ? 'text-amber' : 'text-cyan-300'}`}>
+          {shown(sel)}
+        </div>
+        <div className="mt-1.5 text-[0.875rem] text-mute">
+          {sel.value !== undefined ? 'A single reported figure' : 'A reported range, not a single figure'}, in {unitWord(sel.unit)}, above the control group
+        </div>
+        <dl className="mt-4 space-y-3 text-[0.9rem] leading-relaxed">
+          {sel.period && <div><dt className="mlabel text-mute">Period</dt><dd className="mt-0.5 text-sand/90">{sel.period}</dd></div>}
+          <div><dt className="mlabel text-mute">What it means</dt><dd className="mt-0.5 text-sand/90">{sel.meaning}</dd></div>
+          {sel.caution && <div><dt className="mlabel text-mute">Read with care</dt><dd className="mt-0.5 text-sand/90">{sel.caution}</dd></div>}
+        </dl>
+        {children}
       </div>
     </div>
   );
@@ -268,9 +282,9 @@ export function ProportionRing({ value, caption, sub }:
     <div className="flex items-center gap-5">
       <svg ref={ref} viewBox="0 0 110 110" className="h-28 w-28 shrink-0 -rotate-90" role="img"
         aria-label={`${value} percent. ${caption}`}>
-        <circle cx="55" cy="55" r={R} fill="none" stroke="rgba(148,180,210,0.16)" strokeWidth="9" />
+        <circle cx="55" cy="55" r={R} fill="none" stroke="rgb(var(--line))" strokeWidth="9" />
         <motion.circle
-          cx="55" cy="55" r={R} fill="none" stroke="#22D3EE" strokeWidth="9" strokeLinecap="round"
+          cx="55" cy="55" r={R} fill="none" stroke="rgb(var(--cyan-500))" strokeWidth="9" strokeLinecap="round"
           strokeDasharray={C}
           initial={reduced ? false : { strokeDashoffset: C }}
           animate={{ strokeDashoffset: play ? C * (1 - value / 100) : C }}
@@ -309,21 +323,21 @@ export function StepRates({ steps, unit }:
               onFocus={() => setOn(i)} onBlur={() => setOn(null)}
               tabIndex={0} role="button" aria-label={`${s.period}: ${s.value} ${unit} of actual training expenses`}
               className="cursor-pointer outline-none">
-              <rect x={x - 6} y={PT} width={bw + 12} height={ih + 4} fill={on === i ? 'rgba(34,211,238,0.06)' : 'transparent'} rx="4" />
+              <rect x={x - 6} y={PT} width={bw + 12} height={ih + 4} fill={on === i ? 'rgb(var(--cyan-500) / 0.06)' : 'transparent'} rx="4" />
               <motion.rect
                 x={x} width={bw} rx="3"
-                fill={i === steps.length - 1 ? '#22D3EE' : '#0891B2'}
+                fill={i === steps.length - 1 ? 'rgb(var(--cyan-500))' : 'rgb(var(--cyan-500) / 0.45)'}
                 initial={reduced ? false : { height: 0, y: PT + ih }}
                 animate={{ height: play ? h : 0, y: play ? PT + ih - h : PT + ih, opacity: on === null || on === i ? 1 : 0.55 }}
                 transition={{ duration: reduced ? 0 : 0.85, delay: reduced ? 0 : 0.15 + i * 0.22, ease: [0.16, 1, 0.3, 1] }}
               />
               <motion.text
-                x={x + bw / 2} y={PT + ih - h - 7} fontSize="15" fontWeight="700" fill="#A5F3FC" textAnchor="middle"
+                x={x + bw / 2} y={PT + ih - h - 7} fontSize="15" fontWeight="700" fill="rgb(var(--sand))" textAnchor="middle"
                 initial={reduced ? false : { opacity: 0 }} animate={{ opacity: play ? 1 : 0 }}
                 transition={{ duration: 0.3, delay: reduced ? 0 : 0.7 + i * 0.22 }}>
                 {s.value}{unit}
               </motion.text>
-              <text x={x + bw / 2} y={H - 10} fontSize="9.5" fill={on === i ? '#A5F3FC' : '#8FA6BF'} textAnchor="middle">
+              <text x={x + bw / 2} y={H - 10} fontSize="9.5" fill={on === i ? 'rgb(var(--cyan-200))' : 'rgb(var(--mute))'} textAnchor="middle">
                 {s.period}
               </text>
             </g>

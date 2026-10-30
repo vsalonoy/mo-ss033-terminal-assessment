@@ -3,50 +3,61 @@ export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
+      /*
+       * Colours are CSS variables (src/index.css), so one set of class names serves two
+       * rooms: the light reading room (Home, Explore, Sources) and the dark theatre
+       * (Watch, under .theme-stage). The names are kept from the earlier dark design so
+       * every component keeps its meaning: `ink` is the page and its surfaces, `sand`
+       * the main text, `mute` secondary text, `cyan` evidence and links (teal on paper),
+       * `amber` something proposed, `rose` a limit.
+       */
       colors: {
-        /* Midnight navy field. 900 is the page, 500 is the lightest surface. */
-        ink: { 950: '#030711', 900: '#050B16', 800: '#07101F', 700: '#0A1628', 600: '#0F1E33', 500: '#16293F' },
-        line: 'rgba(148,180,210,0.14)',
-        /* Electric cyan carries emphasis and anything measured. */
-        cyan: { 200: '#A5F3FC', 300: '#67E8F9', 400: '#22D3EE', 500: '#06B6D4', 600: '#0891B2' },
-        /* Indigo is the quiet secondary: second series in a chart, inactive states. */
-        iris: { 300: '#A5B4FC', 400: '#818CF8', 500: '#6366F1' },
-        sand: '#E8EDF4',
-        mute: '#8FA6BF',
-        /* Amber flags something proposed rather than measured. Rose flags a hard limit. */
-        amber: '#E6A94C',
-        rose: '#E07A6B',
-        /* Interaction accent: hover and focus emphasis on cards that do something.
-           Kept apart from cyan so chart and status colours keep their meaning. */
-        accent: { DEFAULT: '#00A3A6', bright: '#34D1D4' },
-        /* Card edge. Neutral white rather than the blue-grey of `line`, so a card
-           reads as a raised surface and not as another divider. */
-        edge: 'rgba(255,255,255,0.10)',
+        ink: {
+          950: 'rgb(var(--ink-950) / <alpha-value>)', 900: 'rgb(var(--ink-900) / <alpha-value>)',
+          800: 'rgb(var(--ink-800) / <alpha-value>)', 700: 'rgb(var(--ink-700) / <alpha-value>)',
+          600: 'rgb(var(--ink-600) / <alpha-value>)', 500: 'rgb(var(--ink-500) / <alpha-value>)',
+        },
+        line: 'rgb(var(--line) / <alpha-value>)',
+        cyan: {
+          200: 'rgb(var(--cyan-200) / <alpha-value>)', 300: 'rgb(var(--cyan-300) / <alpha-value>)',
+          400: 'rgb(var(--cyan-400) / <alpha-value>)', 500: 'rgb(var(--cyan-500) / <alpha-value>)',
+          600: 'rgb(var(--cyan-600) / <alpha-value>)',
+        },
+        iris: { 300: 'rgb(var(--iris) / <alpha-value>)', 400: 'rgb(var(--iris) / <alpha-value>)', 500: 'rgb(var(--iris) / <alpha-value>)' },
+        sand: 'rgb(var(--sand) / <alpha-value>)',
+        mute: 'rgb(var(--mute) / <alpha-value>)',
+        amber: 'rgb(var(--amber) / <alpha-value>)',
+        rose: 'rgb(var(--rose) / <alpha-value>)',
+        /* Fixed: the theatre and anything laid over a photograph stay dark in both rooms. */
+        stage: { DEFAULT: '#0B0F14', ink: '#EDEFF2', mute: '#A3ADBA', accent: '#6FD0C8' },
+        accent: { DEFAULT: 'rgb(var(--cyan-500) / <alpha-value>)', bright: 'rgb(var(--cyan-400) / <alpha-value>)' },
+        edge: 'rgb(var(--line) / <alpha-value>)',
       },
       fontFamily: {
-        /* Space Grotesk carries headings, figures and interface. Inter carries reading
-           and data, where its larger x-height and tabular figures do more work. Plex Mono
-           is for small uppercase labels only, never for anything read as a sentence. */
-        display: ['"Space Grotesk Variable"', '"Space Grotesk Fallback"', 'system-ui', 'sans-serif'],
+        /* Source Serif 4 (bundled) sets headings and headline figures. Inter sets reading,
+           data and the interface, so `display`, used on buttons, chips and labels, is
+           Inter too. Plex Mono is kept for timecodes only. */
+        serif: ['"Source Serif 4 Variable"', '"Source Serif Fallback"', 'Georgia', 'Cambria', 'serif'],
+        display: ['"Inter Variable"', 'Inter', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
         sans: ['"Inter Variable"', 'Inter', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
         mono: ['"IBM Plex Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
       },
       fontSize: {
         /* Fluid scale. Upper bounds are deliberately restrained so headings do not
            eat the screen on a large monitor. */
-        hero:   ['clamp(2.5rem,6.4vw,4.75rem)',  { lineHeight: '1.0',  letterSpacing: '-0.035em', fontWeight: '800' }],
-        sec:    ['clamp(1.75rem,3.1vw,2.6rem)',  { lineHeight: '1.12', letterSpacing: '-0.025em', fontWeight: '700' }],
-        sub:    ['clamp(1.15rem,1.8vw,1.45rem)', { lineHeight: '1.25', letterSpacing: '-0.015em', fontWeight: '700' }],
+        hero:   ['clamp(2.1rem,3.6vw,3.15rem)',   { lineHeight: '1.06', letterSpacing: '-0.02em',  fontWeight: '600' }],
+        sec:    ['clamp(1.8rem,3vw,2.55rem)',    { lineHeight: '1.14', letterSpacing: '-0.015em', fontWeight: '600' }],
+        sub:    ['clamp(1.2rem,1.7vw,1.45rem)',  { lineHeight: '1.3',  letterSpacing: '-0.01em',  fontWeight: '600' }],
         lede:   ['clamp(1.02rem,1.15vw,1.14rem)',{ lineHeight: '1.68', letterSpacing: '-0.005em' }],
-        stat:   ['clamp(1.9rem,3.4vw,2.85rem)',  { lineHeight: '1.0',  letterSpacing: '-0.03em',  fontWeight: '800' }],
+        stat:   ['clamp(2.2rem,3.6vw,3rem)',     { lineHeight: '1.0',  letterSpacing: '-0.02em',  fontWeight: '600' }],
         statsm: ['clamp(1.35rem,2vw,1.7rem)',    { lineHeight: '1.05', letterSpacing: '-0.025em', fontWeight: '800' }],
-        body:   ['0.975rem',  { lineHeight: '1.72' }],
+        body:   ['1rem',       { lineHeight: '1.72' }],
         small:  ['0.875rem',  { lineHeight: '1.62' }],
-        micro:  ['0.78rem',   { lineHeight: '1.5' }],
-        label:  ['0.69rem',   { lineHeight: '1.3', letterSpacing: '0.15em', fontWeight: '600' }],
-        tick:   ['0.72rem',   { lineHeight: '1.2', fontWeight: '500' }],
+        micro:  ['0.875rem',   { lineHeight: '1.5' }],
+        label:  ['0.78rem',   { lineHeight: '1.3', letterSpacing: '0.1em', fontWeight: '600' }],
+        tick:   ['0.75rem',   { lineHeight: '1.2', fontWeight: '500' }],
       },
-      maxWidth: { reading: '68ch' },
+      maxWidth: { reading: '68ch', page: '1200px' },
       transitionTimingFunction: {
         out: 'cubic-bezier(0.22,0.61,0.36,1)',
         expo: 'cubic-bezier(0.16,1,0.3,1)',

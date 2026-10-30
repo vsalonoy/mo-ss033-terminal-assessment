@@ -3,24 +3,53 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useSite } from '../hooks/useSiteState';
 import { ScrollProgress } from './Ambient';
 import { SECTIONS, PROJECT } from '../data/research';
+import { EXPLORE_CHAPTERS } from '../data/explore';
+import { usePresentation } from '../hooks/usePresentation';
 
-/* Top bar: wordmark, section jump list, and the responsive Sections menu. */
+type Region = 'home' | 'explore' | 'sources';
+/* Which room of the document is under the top bar. */
+function useRegion(): Region {
+  const [r, setR] = useState<Region>('home');
+  useEffect(() => {
+    let frame = 0;
+    const measure = () => {
+      frame = 0;
+      const past = (id: string) => (document.getElementById(id)?.getBoundingClientRect().top ?? Infinity) <= 96;
+      setR(past('sources') ? 'sources' : past('explore') ? 'explore' : 'home');
+    };
+    const schedule = () => { if (!frame) frame = requestAnimationFrame(measure); };
+    measure();
+    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', schedule);
+    return () => {
+      if (frame) cancelAnimationFrame(frame);
+      window.removeEventListener('scroll', schedule);
+      window.removeEventListener('resize', schedule);
+    };
+  }, []);
+  return r;
+}
+
+/* Top bar: the title, the three places in the document, Watch, and the Contents menu. */
 export function TopBar() {
-  const { index, go } = useSite();
+  const { go } = useSite();
+  const { enabled, watch, view } = usePresentation();
+  const region = useRegion();
+  const theatre = view === 'watch';
   const [open, setOpen] = useState(false);
 
   /**
-   * The section chosen from the responsive menu, navigated only once the menu's
-   * exit animation has finished.
+   * The destination chosen from the Contents menu (an element id), navigated only
+   * once the menu's exit animation has finished.
    *
    * Navigating while that animation runs does not work. The menu animates
    * `height: auto -> 0`, and that measurement saves and restores the document
    * scroll position, which was (0, 0) at the moment of the click. The restore
-   * lands after go() has already scrolled, so the page snaps back to the top and
+   * lands after the scroll has started, so the page snaps back to the top and
    * the selection appears to do nothing. Deferring to onExitComplete ties the
    * navigation to the animation lifecycle rather than to a guessed delay.
    */
-  const [pending, setPending] = useState<number | null>(null);
+  const [pending, setPending] = useState<string | null>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   /* Dismissal sends focus back to the trigger; selection sends it forward to the
@@ -61,17 +90,6 @@ export function TopBar() {
     return () => document.removeEventListener('pointerdown', onDown, true);
   }, [open, dismiss]);
 
-  /* The menu is hidden from xl upwards. Closing it on the way past that breakpoint
-     stops the trigger reporting aria-expanded="true" while invisible. */
-  useEffect(() => {
-    if (!open) return;
-    const mq = window.matchMedia('(min-width: 1280px)');
-    const onChange = () => { if (mq.matches) dismiss(); };
-    onChange();
-    mq.addEventListener('change', onChange);
-    return () => mq.removeEventListener('change', onChange);
-  }, [open, dismiss]);
-
   /**
    * Runs after the menu has finished animating out, so the scroll restore
    * described above has already happened and cannot undo the navigation.
@@ -83,44 +101,54 @@ export function TopBar() {
       return;
     }
     if (pending === null) return;
-    const i = pending;
+    const id = pending;
     setPending(null);
-    go(i);
-    /* Move focus to the destination so a keyboard reader lands on the new section.
-       Polled rather than assumed, so focus still lands if the section renders late.
-       preventScroll keeps focusing from fighting the scroll go() just started. */
+    /* From the theatre, a destination is a change of room: the address carries it. */
+    if (theatre) { location.hash = id; return; }
+    const i = SECTIONS.findIndex(s => s.id === id);
+    if (i >= 0) go(i);
+    else document.getElementById(id)?.scrollIntoView({ block: 'start' });
+    /* Move focus to the destination so a keyboard reader lands on it. Polled rather
+       than assumed, so focus still lands if it renders late. preventScroll keeps
+       focusing from fighting the scroll that has just started. */
     let tries = 48;
     const land = () => {
-      const el = document.getElementById(SECTIONS[i].id);
+      const el = document.getElementById(id);
       if (el) { el.focus({ preventScroll: true }); return; }
       if (tries-- > 0) requestAnimationFrame(land);
     };
     requestAnimationFrame(land);
-  }, [pending, go]);
+  }, [pending, go, theatre]);
+
+  const choose = (id: string) => { setPending(id); setOpen(false); };
+  const place = (id: Region, label: string, href: string) => (
+    <a href={href} aria-current={!theatre && region === id ? 'location' : undefined}
+      className={`inline-flex min-h-[44px] items-center rounded-full px-3.5 text-[0.92rem] font-semibold transition-colors ${
+        !theatre && region === id ? 'bg-ink-700 text-sand shadow-[inset_0_0_0_1px_rgb(var(--line))]' : 'text-mute hover:text-sand'}`}>
+      {label}
+    </a>
+  );
 
   return (
-    <div className="fixed top-0 inset-x-0 z-40 border-b border-line bg-ink-900/85 backdrop-blur-md">
-      <div className="wrap flex items-center gap-3 sm:gap-4 h-14">
-        <a
-          href="#top"
-          className="min-w-0 font-display text-[0.88rem] sm:text-[0.95rem] font-bold text-sand truncate hover:text-cyan-300"
-        >
-          Automation <span className="text-mute">and Filipino workers</span>
+    <div className="no-print fixed top-0 inset-x-0 z-40 border-b border-line bg-ink-900/90 backdrop-blur-md">
+      <div className="wrap flex h-16 items-center gap-3 sm:gap-4">
+        <a href="#top" className="flex min-h-[44px] min-w-0 flex-col justify-center leading-tight text-sand hover:text-cyan-200">
+          <span className="block truncate font-serif text-[0.98rem] font-semibold sm:text-[1.05rem]">{PROJECT.title}</span>
+          <span className="hidden truncate text-[0.78rem] text-mute sm:block">{PROJECT.course} · {PROJECT.assessment}</span>
         </a>
 
-        <nav aria-label="Sections" className="hidden xl:flex items-center gap-1 ml-auto">
-          {SECTIONS.map((s, i) => (
-            <button
-              key={s.id} onClick={() => go(i)}
-              aria-current={i === index ? 'true' : undefined}
-              title={s.label}
-              className={`px-2 py-1 rounded font-display text-[0.7rem] font-bold tracking-wide transition-colors ${
-                i === index ? 'text-cyan-300 bg-cyan-500/10' : 'text-mute hover:text-sand'}`}
-            >{s.letter}</button>
-          ))}
+        <nav aria-label="Site" className="ml-auto hidden items-center gap-1 lg:flex">
+          {place('home', 'Home', '#top')}
+          {place('explore', 'Explore', '#explore')}
+          {place('sources', 'Sources', '#sources')}
         </nav>
 
-        <div className="ml-auto xl:ml-0 flex items-center gap-2 shrink-0">
+        <div className="ml-auto flex shrink-0 items-center gap-2 lg:ml-0">
+          {enabled && !theatre && (
+            <button type="button" onClick={() => watch(0)} className="btn btn-p !px-4 !py-1.5 !text-[0.9rem]">
+              <span aria-hidden>▶</span> Watch
+            </button>
+          )}
           <button
             ref={triggerRef}
             onClick={() => setOpen(o => {
@@ -129,35 +157,65 @@ export function TopBar() {
               if (!o) { setPending(null); returnFocus.current = false; }
               return !o;
             })}
-            aria-expanded={open} aria-controls="section-menu" aria-label="Section list"
-            className="xl:hidden btn btn-g !px-2.5 !py-1.5 !text-[0.7rem]"
-          >Sections</button>
+            aria-expanded={open} aria-controls="section-menu"
+            className="btn btn-g !px-4 !py-1.5 !text-[0.9rem]"
+          >Contents</button>
         </div>
       </div>
 
-      <ScrollProgress />
+      {!theatre && <ScrollProgress />}
 
       <AnimatePresence onExitComplete={onExitComplete}>
         {open && (
           <motion.div
             ref={menuRef}
-            id="section-menu" className="xl:hidden border-t border-line bg-ink-800/95"
+            id="section-menu" className="border-t border-line bg-ink-900"
             initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.22 }}
           >
-            <ul className="wrap py-3 max-h-[60vh] overflow-y-auto">
-              {SECTIONS.map((s, i) => (
-                <li key={s.id}>
-                  <button
-                    onClick={() => { setPending(i); setOpen(false); }}
-                    className={`w-full text-left py-2 flex gap-3 text-[0.9rem] ${
-                      i === index ? 'text-cyan-300' : 'text-sand/90 hover:text-cyan-300'}`}
-                  >
-                    <span className="font-display text-[0.75rem] font-bold text-cyan-300/70 w-4">{s.letter}</span>{s.label}
+            <nav aria-label="Contents" className="wrap grid max-h-[80vh] gap-x-8 gap-y-5 overflow-y-auto py-5 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="lg:hidden">
+                <ul>
+                  {([['top', 'Home'], ['explore', 'Explore: all chapters']] as const).map(([id, label]) => (
+                    <li key={id}>
+                      <button onClick={() => choose(id)} className="min-h-[44px] w-full py-2 text-left text-[1rem] font-semibold text-sand hover:text-cyan-200">{label}</button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              {EXPLORE_CHAPTERS.map(ch => (
+                <div key={ch.id}>
+                  <button onClick={() => choose(ch.id)}
+                    className="min-h-[44px] w-full py-2 text-left font-serif text-[1.05rem] font-semibold text-sand hover:text-cyan-200">
+                    <span className="mlabel mr-2 text-mute">Chapter {ch.n}</span>{ch.title}
                   </button>
-                </li>
+                  <ul>
+                    {SECTIONS.filter(s => ch.letters.includes(s.letter)).map(s => (
+                      <li key={s.id}>
+                        <button onClick={() => choose(s.id)}
+                          className="flex min-h-[44px] w-full items-baseline gap-3 py-2 text-left text-[0.95rem] text-sand/90 hover:text-cyan-200">
+                          <span className="w-4 font-semibold text-cyan-300">{s.letter}</span>{s.label}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               ))}
-            </ul>
+              <div>
+                <button onClick={() => choose('sources')}
+                  className="min-h-[44px] w-full py-2 text-left font-serif text-[1.05rem] font-semibold text-sand hover:text-cyan-200">
+                  Sources and method
+                </button>
+                <ul>
+                  <li>
+                    <button onClick={() => choose('references')}
+                      className="flex min-h-[44px] w-full items-baseline gap-3 py-2 text-left text-[0.95rem] text-sand/90 hover:text-cyan-200">
+                      <span className="w-4 font-semibold text-cyan-300">L</span>References
+                    </button>
+                  </li>
+                </ul>
+              </div>
+            </nav>
           </motion.div>
         )}
       </AnimatePresence>
@@ -165,34 +223,12 @@ export function TopBar() {
   );
 }
 
-/* Slim reading-progress rail down the left, on large screens. */
-export function SectionRail() {
-  const { index, go } = useSite();
-  return (
-    <nav aria-label="Section progress" className="hidden lg:flex fixed left-5 top-1/2 -translate-y-1/2 z-30 flex-col gap-2.5">
-      {SECTIONS.map((s, i) => (
-        <button
-          key={s.id} onClick={() => go(i)} title={`${s.letter}. ${s.label}`}
-          aria-current={i === index ? 'true' : undefined}
-          className="group flex items-center gap-2"
-        >
-          <span className={`block h-px transition-all ${
-            i === index ? 'w-7 bg-cyan-300' : 'w-3.5 bg-mute/40 group-hover:w-5 group-hover:bg-mute'}`} />
-          <span className={`font-display text-[0.66rem] font-semibold transition-opacity ${
-            i === index ? 'text-cyan-300 opacity-100' : 'text-mute opacity-0 group-hover:opacity-100'}`}>
-            {s.letter}
-          </span>
-        </button>
-      ))}
-    </nav>
-  );
-}
-
 export function Footer() {
   return (
-    <footer className="border-t border-line py-12">
-      <div className="wrap text-[0.78rem] leading-relaxed text-mute/80">
-        <p className="mlabel text-mute">{PROJECT.course}</p>
+    <footer className="border-t border-line bg-ink-800 py-12">
+      <div className="wrap text-[0.9rem] leading-relaxed text-mute">
+        <p className="font-serif text-[1.05rem] font-semibold text-sand">{PROJECT.title}</p>
+        <p className="mt-1">{PROJECT.course}</p>
         <p className="mt-2">
           {PROJECT.assessment} &nbsp;&middot;&nbsp; {PROJECT.student} &nbsp;&middot;&nbsp;
           Section {PROJECT.section} &nbsp;&middot;&nbsp; Mentor {PROJECT.mentor} &nbsp;&middot;&nbsp;

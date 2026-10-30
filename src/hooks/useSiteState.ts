@@ -99,7 +99,8 @@ export function useHashNavigation() {
     };
 
     if (location.hash) {
-      document.fonts.ready.then(() => requestAnimationFrame(() => {
+      /* document.fonts is missing in some environments (jsdom); land without waiting there. */
+      (document.fonts?.ready ?? Promise.resolve()).then(() => requestAnimationFrame(() => {
         const el = target();
         if (!cancelled && el) land(el);
       }));

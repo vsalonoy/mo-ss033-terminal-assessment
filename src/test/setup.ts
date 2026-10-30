@@ -21,6 +21,16 @@ Object.assign(window, { IntersectionObserver: NoopObserver, ResizeObserver: Noop
 window.scrollTo = () => {};
 Element.prototype.scrollIntoView = () => {};
 HTMLCanvasElement.prototype.getContext = (() => null) as typeof HTMLCanvasElement.prototype.getContext;
+/* jsdom has <dialog> but not its methods. Enough to open and close it; focus
+   trapping and Escape are the browser's job and are checked in a real browser. */
+if (!HTMLDialogElement.prototype.showModal) {
+  HTMLDialogElement.prototype.showModal = function () { this.setAttribute('open', ''); };
+  HTMLDialogElement.prototype.close = function () {
+    if (!this.hasAttribute('open')) return;
+    this.removeAttribute('open');
+    this.dispatchEvent(new Event('close'));
+  };
+}
 
 /* No test may reach the network. A test that submits the form stubs fetch itself. */
 beforeEach(() => {

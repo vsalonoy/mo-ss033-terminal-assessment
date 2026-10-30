@@ -84,6 +84,31 @@ export const REFERENCES: Reference[] = [
     url:'http://web.archive.org/web/20251222102921/https://www.wsg.gov.sg/home/employers-industry-partners/workforce-development-job-redesign/support-for-job-redesign-under-productivity-solutions-grant' },
 ];
 
+/**
+ * How the sources were evaluated, against the four class Evaluating Information
+ * criteria (CC-3). Shown in section L. Every statement describes what the site
+ * already does or what the reference list already shows.
+ */
+export const SOURCE_EVALUATION: { criterion: string; t: string }[] = [
+  { criterion:'Authority', t:'I relied first on intergovernmental and government sources (the International Labour Organization, the Asian Development Bank, the Philippine Statistics Authority, DOLE and TESDA, and Singapore\u2019s ministries and Workforce Singapore) and on the text of the Philippine laws themselves.' },
+  { criterion:'Accuracy', t:'In October 2026 I checked each source against the claim it supports, and each law against its full text.' },
+  { criterion:'Relevance', t:'Each evidence card states the area a source covers, and Singapore results are labelled as Singapore only.' },
+  { criterion:'Purpose', t:'Three sources are news or industry media (The Freeman, People Matters SEA and Malaya Business Insight), and one is an agency announcement (TESDA); I use them for reported developments such as sector growth, partnerships and the funding announcement, and keep the reasons firms adopt AI separate from evidence of what happens to workers.' },
+];
+export const SOURCE_EVALUATION_INTRO = 'I assessed every source against the four class Evaluating Information criteria.';
+
+/** The kind of each source, shown beside its reference in section L (CC-3). */
+export const SOURCE_TYPE: Record<RefKey, string> = {
+  adb2020:'Intergovernmental', adb2021:'Intergovernmental', huynh2026:'Intergovernmental',
+  ilo2026a:'Intergovernmental', ilo2026b:'Intergovernmental',
+  psa2026:'Government statistics',
+  ra10869:'Statute', ra11962:'Statute', ra12063:'Statute',
+  dole:'Government programme or agency', tesda2025:'Agency announcement', wsg:'Government programme or agency',
+  momwsg2026:'Government programme or agency', moe2025:'Government programme or agency',
+  mti2025:'Government evaluation',
+  dagooc2026:'News or industry media', khan2026:'News or industry media', malaya2025:'News or industry media',
+};
+
 export const refMap = Object.fromEntries(REFERENCES.map(r => [r.key, r])) as Record<RefKey, Reference>;
 
 export const shortCite = (k: RefKey) => {
@@ -108,6 +133,8 @@ export interface Evidence {
   finding: string;
   scope: string;
   ref: RefKey;
+  /** How the figure relates to another source's figure, with that source cited (CC-9). */
+  note?: Sentence;
   /** Which section the claim appears in, so the card can sit next to it. */
   section: 'challenge' | 'ranking' | 'proposal' | 'solutions';
 }
@@ -127,7 +154,8 @@ export const EVIDENCE: Evidence[] = [
     scope:'ASEAN, ten countries', ref:'ilo2026b' },
   { id:'e4', section:'challenge',
     claim:'49.21 million Filipinos were employed in July 2026',
-    finding:'Employment rose to 49.21 million as underemployment declined. This is the base the exposure share is measured against.',
+    finding:'Employment rose to 49.21 million as underemployment declined.',
+    note:{ t:'This is later than the data the ILO used: its exposure estimate, 27.7 percent of employment or 12.7 million workers, was calculated on Labour Force Survey data for the first quarter of 2024, so 12.7 million should not be divided by 49.21 million.', refs:['huynh2026'] },
     scope:'Philippines, July 2026 labour force survey', ref:'psa2026' },
   { id:'e5', section:'challenge',
     claim:'The contact centre sector grew about 4 percent to 1.68 million workers in 2025',
@@ -164,6 +192,17 @@ export const PROJECT = {
   course: 'MO-SS033 The Contemporary World',
   assessment: 'Terminal Assessment',
   student: 'Vanessa Rose A. Salonoy',
+  /** The researcher card on the opening screen uses the same form as the video. */
+  researcher: 'Vanessa R. A. Salonoy',
+  college: 'Mapúa Malayan Digital College',
+  /**
+   * The researcher introduction: the approved opening narration (o1, then o2, as in
+   * the video), word for word. Nothing is added about motivation or background.
+   */
+  introduction: [
+    'Technology is changing the way people work around the world, and the Philippines is no exception. As automation and artificial intelligence become more common, Filipino workers face both new opportunities and challenges.',
+    'I\u2019m Vanessa Salonoy, and this research examines how workplace automation affects Filipino workers, compares five possible responses, and evaluates one proposed solution to help workers transition into new roles.',
+  ],
   section: 'H1103',
   mentor: 'Ms. Bella Joy Bardolas',
   arrangement: 'Working individually',
@@ -190,7 +229,9 @@ export const PROJECT = {
 export const AUDIENCE = {
   who: 'Filipino workers in automation-exposed occupations, and the people who design support for them: PESO staff, employer learning and development teams, and training providers.',
   known: 'This audience already knows that automation is changing work, and most have seen the headline warnings about jobs disappearing. Workers in IT-BPM in particular have watched AI pilots arrive in their own workplaces.',
-  needed: 'What is less widely understood is the difference between exposure and displacement. More than a quarter of Philippine employment sits in exposed occupations, but only 3.6 percent falls in the highest displacement risk group, and the disruption has not arrived at the scale the warnings implied. The support that exists is also narrower than it appears: training is funded, but income during a mid-career transition is not.',
+  /* Stage E (approved Stage D recommendation): the figures are no longer repeated
+     here; the section A block points to section B, where they are sourced. */
+  needed: 'What is less widely understood is the difference between exposure and displacement. Far more work sits in occupations exposed to generative AI than falls in the highest displacement risk group, and the disruption has not arrived at the scale the warnings implied. The support that exists is also narrower than it appears: training is funded, but income during a mid-career transition is not.',
   consider: 'After reading, the intended audience should be able to say which existing Philippine programme would and would not cover a worker in their situation, and why income support during retraining is the gap this proposal tries to close rather than another training scheme.',
   ref: ['huynh2026'] as RefKey[],
 };
@@ -234,7 +275,7 @@ export const HEADLINE_STATS: Stat[] = [
     detail:'Exposure means task automation inside occupations. It is not the same as a job being replaced.', ref:['huynh2026'] },
   { value:'49.21M', countTo:49.21, decimals:2, suffix:'M', accent:'cyan',
     label:'Filipinos employed as of July 2026',
-    detail:'The employment base the exposure figure sits inside.', ref:['psa2026'] },
+    detail:'Total employment in July 2026. The ILO\u2019s exposure estimate uses first-quarter 2024 data, so the two figures are not directly comparable.', ref:['psa2026'] },
   { value:'1.68M', countTo:1.68, decimals:2, suffix:'M', accent:'cyan',
     label:'contact centre workers, after about 4 percent growth in 2025',
     detail:'The sector grew even as more than two thirds of industry member firms ran AI pilots.', ref:['dagooc2026','khan2026'] },
@@ -321,7 +362,7 @@ export const SOLUTIONS: Solution[] = [
       feasibility:{r:'High', why:'Already funded and approved to start, with Philippine agencies and a legal mandate in place.'},
       effectiveness:{r:'Not shown', why:'No published outcome results among the sources I reviewed, because it was only set to start in the second half of 2025.'},
     },
-    rankWhy:'It scores highest of the five on feasibility, on the evidence available: it is funded, approved with a start date, and backed by legislation. What it does not have yet is a published outcome result, and its target is narrow against the exposed population. I weighted effectiveness more heavily because my question is whether workers are actually supported, not whether a programme exists.',
+    rankWhy:'It is joint highest of the five on feasibility, with JobStart, on the evidence available: it is funded, approved with a start date, and backed by legislation. What it does not have yet is a published outcome result, and its target is narrow against the exposed population. I weighted effectiveness more heavily because my question is whether workers are actually supported, not whether a programme exists.',
     ref:['malaya2025','ra11962','tesda2025','huynh2026'] },
 
   { id:'s2', rank:4, name:'Employer-led job redesign', short:'Job redesign', where:'Singapore',
@@ -357,7 +398,7 @@ export const SOLUTIONS: Solution[] = [
     ],
     criteria:{
       sustainability:{r:'Moderate to high', why:'A standing Workforce Singapore programme rather than a time-bounded grant.'},
-      impact:{r:'High', why:'It keeps workers earning while the role changes, and Philippine exposure sits in exactly the service, sales and clerical roles this is designed to move people out of.'},
+      impact:{r:'High', why:'It keeps workers earning while the role changes. Its Singapore evaluation found stronger effects for non-PMET and mature workers, and Philippine exposure is concentrated in service, sales and clerical roles.'},
       feasibility:{r:'Moderate', why:'RA 11962 and now RA 12063 give a legal basis, but I found no Philippine funding line for conversion itself.'},
       effectiveness:{r:'Strongest', why:'The only one of the five with a published control-group evaluation reporting measured wage and retention gains.'},
     },
@@ -376,12 +417,12 @@ export const SOLUTIONS: Solution[] = [
       'Section 5 restricts it to Filipinos aged 18 to 24 at registration who are not employed, studying or in training, with no work experience or less than one year of it. Seventeen year olds may register if they will be 18 by the technical training stage.',
     ],
     criteria:{
-      sustainability:{r:'High', why:'Institutionalised nationwide by law, with a standing appropriation and PESO delivery.'},
+      sustainability:{r:'High', why:'Institutionalised nationwide by law and delivered through PESOs.'},
       impact:{r:'Moderate', why:'Reaches young entry-level workers, whom the ILO identifies as being at greater displacement risk, but by its own rules it excludes anyone with a year of work experience.'},
       feasibility:{r:'High', why:'Already operating, with employer grants, allowances and monitoring already defined.'},
       effectiveness:{r:'Not shown', why:'I found no published impact evaluation. ADB’s 2020 evaluation did not rate the JobStart rollout assistance, which was still ongoing.'},
     },
-    rankWhy:'Scores highest on sustainability and feasibility because it is written into law and already delivered nationwide through PESOs. The problem is reach: by eligibility it cannot serve a worker displaced from an automated role mid-career. It matters to this proposal anyway, because its delivery mechanics are the ones the Philippine adaptation borrows.',
+    rankWhy:'Rates high on sustainability and feasibility because it is written into law and already delivered nationwide through PESOs. The problem is reach: by eligibility it cannot serve a worker displaced from an automated role mid-career. It matters to this proposal anyway, because its delivery mechanics are the ones the Philippine adaptation borrows.',
     ref:['ra10869','dole','adb2020','huynh2026'] },
 
   { id:'s5', rank:5, name:'Portable individual training credit', short:'Training credit', where:'Singapore',
@@ -408,17 +449,22 @@ export const SOLUTIONS: Solution[] = [
 export const RANKED = [...SOLUTIONS].sort((a,b)=>a.rank-b.rank);
 
 export const CRITERIA = [
-  { key:'sustainability', label:'Sustainability', blurb:'Can the result be maintained over the long term, not just for a short period?' },
-  { key:'impact',         label:'Impact',         blurb:'How much does it change for how many of the people affected?' },
-  { key:'feasibility',    label:'Feasibility',    blurb:'Is it realistic and possible to implement, given cost and scale?' },
-  { key:'effectiveness',  label:'Effectiveness',  blurb:'Is there evidence that it actually worked for the people it was meant to help?' },
+  { key:'sustainability', label:'Sustainability', blurb:'Can it keep working over time without exhausting resources or creating new problems, and who would maintain it?' },
+  { key:'impact',         label:'Impact',         blurb:'What difference could it make for the people affected: who, how many, and is anyone harmed or left out?' },
+  { key:'feasibility',    label:'Feasibility',    blurb:'Could it realistically be carried out here, with the time, people, skills, resources and permissions available in the Philippines?' },
+  { key:'effectiveness',  label:'Effectiveness',  blurb:'Do studies or real examples show it has addressed a similar problem, and does it target the main cause?' },
 ] as const;
 
+/**
+ * Shown in section D. These four compare the alternatives at the Determining
+ * Solution stage. They share their names with the four Evaluating Success
+ * criteria in section I, which is why this note keeps the two stages apart.
+ */
 export const CRITERIA_PROVENANCE =
-  'These four were agreed by the class in the Week 8 session as the criteria for evaluating success. The session recording transcribes the third as "visibility", but the student who proposed it said feasibility and described it as covering whether a solution is realistic and possible to implement. The wording still needs confirming against the class-approved criteria sheet. No numerical scores or weights were agreed, so none are used here.';
+  'These are four of the five class Determining Solution criteria, which I selected for comparing the alternatives. I did not rank on the fifth, acceptability, because worker acceptance is unmeasured in every source I reviewed, for all five alternatives, so it could not separate them; it is built into my evaluation instead, as a SMART indicator that sets a baseline in the first cohort. I used sustainability in its place because some of the alternatives rest on time-bounded funding, so whether a programme can continue does separate them. These four share their names with the four Evaluating Success criteria, but here they compare existing programmes on the evidence available about each one. The selected proposal is evaluated for success separately, in section I. The ratings are qualitative: no numerical scores or weights are calculated, and section E explains why effectiveness was given the most weight in deciding the order.';
 
 export const RANKING_NOTE =
-  'The relative order of the first three is the same as in Milestone 2. I checked it against the Terminal Assessment criteria rather than assuming it. Sustainability replacing acceptability pulled JobStart up. The two added solutions sit below the Philippine programmes because, with effectiveness not shown for any of the four, both rate lower on feasibility here: job redesign has no comparable Philippine funding vehicle, and individual training accounts would be the heaviest lift of the five.';
+  'Milestone 2 compared three of these alternatives (place-and-train conversion, national reskilling and job redesign) on impact, effectiveness, feasibility and acceptability, and ranked them in that order. On the class Determining Solution criteria used here, with sustainability in place of acceptability, their relative order is unchanged. JobStart and the portable training credit were added for this assessment. National reskilling and JobStart are close on the four criteria, and JobStart rates higher on sustainability; I ranked reskilling above it because of who each can reach: reskilling is aimed at workers already employed in IT-BPM, while JobStart, by law, serves 18 to 24 year olds with no work experience or less than one year of it, so it cannot serve the mid-career workers in exposed roles this research is about. Job redesign and the training credit sit below the two Philippine programmes because, with effectiveness not shown for any of the four, both rate lower on feasibility here: job redesign has no comparable Philippine funding vehicle, and individual training accounts would be the heaviest lift of the five.';
 
 /* ------------------------------------------------------ singapore evidence */
 export const SG_OUTCOMES = [
@@ -502,11 +548,11 @@ export const PROPOSAL = {
     ],
   },
   adaptation:[
-    { k:'Who it is for', v:'Workers already in automation-exposed roles, rather than JobStart’s 18 to 24 year old new entrants. RA 12063 Section 6 already makes employed workers eligible for enterprise-based training, so the training side needs no new eligibility rule.', ref:['ra12063','ra10869'] as RefKey[] },
+    { k:'Who it is for', v:'Workers already in automation-exposed roles, rather than JobStart’s 18 to 24 year old new entrants. Employed workers are already eligible for enterprise-based training (see Legal basis in place, above), so the training side needs no new eligibility rule.', ref:['ra12063','ra10869'] as RefKey[] },
     { k:'Entry route', v:'PESO intake and assessment, as JobStart already does, with referral from employers who are automating roles.', ref:['dole'] as RefKey[] },
     { k:'Training', v:'Employer-delivered or TVI-partnered training registered with TESDA under the EBET framework.', ref:['ra12063'] as RefKey[] },
     { k:'Income during transition', v:'A training allowance and stipend on the JobStart pattern, with the amount set for this group. This is the part no existing Philippine scheme provides for mid-career workers, and it is the core of the proposal.', ref:['dole'] as RefKey[] },
-    { k:'Employer incentive', v:'The RA 12063 Section 20 training-expense deduction, which already exists in law, alongside a JobStart-style grant covering part of the allowance.', ref:['ra12063','dole'] as RefKey[] },
+    { k:'Employer incentive', v:'The Section 20 training-expense deduction (see Machinery in place, above), alongside a JobStart-style grant covering part of the allowance.', ref:['ra12063','dole'] as RefKey[] },
     { k:'Funding source', v:'The existing IT-BPM reskilling commitment, at least for a first cohort in the sector where exposure is highest.', ref:['malaya2025'] as RefKey[] },
     { k:'Proposed lead agencies', v:'DOLE and PESOs to deliver, TESDA for standards and EBET registration, DICT and IBPAP for demand signals. None has been approached or has agreed to this.', ref:['ra10869','ra12063','malaya2025'] as RefKey[] },
   ],
@@ -514,7 +560,7 @@ export const PROPOSAL = {
               'TESDA-registered enterprise training programmes mapped to converted roles',
               'Employers willing to open conversion posts' ],
   financial:[ 'A training allowance and stipend on the JobStart pattern, set for this group',
-              'The RA 12063 Section 20 deduction, which is already law rather than a new ask',
+              'The EBET training-expense deduction, which is already law rather than a new ask',
               'Drawn from the existing IT-BPM commitment, so no new appropriation is assumed' ],
   depends:[ 'Employers hiring before training is complete',
             'An income-support rule for mid-career trainees, which does not exist today',
@@ -695,12 +741,12 @@ export const SMART: Smart[] = [
     baseline:'No Philippine baseline exists, because no comparable place-and-train scheme runs here. JobStart partner employer counts are not comparable, since those are internship hosts rather than conversion employers.' },
   { id:'m5', name:'Reach into exposed groups',
     definition:'The share of places going to the groups the ILO identifies as most exposed: women, young entry-level workers and NCR-based roles.',
-    target:'Place shares at least match the exposure shares the ILO reports', method:'Compare intake records against the ILO Philippines brief',
+    target:'Each cohort reports the share of places going to each group, set beside that group\u2019s exposure rate in the ILO brief; a group whose share of places is low relative to its exposure is flagged for targeted recruitment in the next cohort', method:'Compare intake records against the ILO Philippines brief',
     source:'PESO intake records and the ILO brief', timeframe:'Each cohort', owner:'PESO and DOLE',
     assumption:'The ILO figure is exposure, not displacement, so it is a reference point rather than a demand estimate.',
     objective:'Check that places reach the groups the exposure evidence identifies, rather than the easiest candidates to recruit.',
     targetGroup:'Women, young entry-level workers, and workers in NCR, Central Luzon and Calabarzon.',
-    baseline:'The ILO exposure shares serve as the reference point rather than a baseline: women at roughly double men\u2019s exposure, and around two in five NCR jobs exposed. These describe exposure, not demand for places.' },
+    baseline:'The ILO exposure rates serve as the reference point rather than a baseline: women at roughly double men\u2019s exposure rate, and around two in five NCR jobs exposed. These are rates within each group, not each group\u2019s share of exposed workers, so they cannot be compared directly with shares of places. They describe exposure, not demand for places.' },
   { id:'m6', name:'Worker-reported outcome', measureOnly:true,
     definition:'Whether participants say the conversion improved their security and prospects. Worker acceptability was unmeasured in everything I reviewed.',
     target:'Establish a baseline in the first cohort rather than set a pass mark', method:'Short standardised survey',
@@ -713,17 +759,80 @@ export const SMART: Smart[] = [
 export const SMART_CAVEAT =
   'Every target here is a proposed planning target that I set. None is a measured result, and none is a baseline taken from an existing Philippine programme, because I did not find published outcome data for one.';
 
-/* ------------------------------------- class criteria applied to the proposal */
-export const PROPOSAL_CRITERIA = [
+/* ----------------------------- evaluating success, applied to the proposal (I) */
+/**
+ * How each Evaluating Success criterion would be assessed. Built only from the
+ * SMART indicators in section H and the risks in section J. `kind` keeps apart
+ * what a SMART indicator measures, what is only a proxy, what can only be judged
+ * qualitatively, and where the framework has no measure at all. No new indicator
+ * or target is introduced here.
+ */
+export type AssessKind = 'indicator' | 'baseline' | 'proxy' | 'qualitative' | 'gap' | 'limitation';
+export const ASSESS_KIND_LABEL: Record<AssessKind, string> = {
+  indicator: 'SMART indicator', baseline: 'Baseline only', proxy: 'Proxy',
+  qualitative: 'Qualitative', gap: 'Measurement gap', limitation: 'Limitation',
+};
+export interface ProposalCriterion {
+  label: string; verdict: string; body: string;
+  assess: { kind: AssessKind; t: string }[];
+}
+
+export const PROPOSAL_CRITERIA: ProposalCriterion[] = [
   { label:'Sustainability', verdict:'Moderate to high',
-    body:'It runs on machinery that already exists in law and in practice, which is why I chose this adaptation over building something new. RA 12063 in particular gives the training side a standing legal framework with a legislated employer incentive. The weakness is that the cash would come from a three-year commitment rather than a permanent facility.' },
+    body:'It runs on machinery that already exists in law and in practice, which is why I chose this adaptation over building something new. RA 12063 in particular gives the training side a standing legal framework with a legislated employer incentive. The weakness is that the cash would come from a three-year commitment rather than a permanent facility.',
+    assess:[
+      { kind:'gap', t:'The SMART framework in section H has no dedicated sustainability indicator, and none is set here.' },
+      { kind:'proxy', t:'Placement retention is recorded at 12 months as well as at six, so it would show whether individual outcomes last beyond the support period. It does not show whether the track itself continues.' },
+      { kind:'qualitative', t:'Whether funding continues past the three-year IT-BPM commitment, and whether employers keep offering conversion places after a first cohort. Section J proposes reporting results early enough to make the case for a standing funding line. These are considerations for assessment, not targets. Proposed review point: at the end of the second year of the commitment, the Bureau of Local Employment would record whether funding beyond the three years has been decided and whether first-cohort employers have offered places in a second cohort.' },
+    ] },
   { label:'Impact', verdict:'High in principle, narrow at first',
-    body:'It keeps income in place during the transition, which none of the other four do. But a first cohort in IT-BPM would still reach a small fraction of the 12.7 million exposed workers.' },
+    body:'It keeps income in place during the transition, which none of the other four do. But a first cohort in IT-BPM would still reach a small fraction of the 12.7 million exposed workers.',
+    assess:[
+      { kind:'indicator', t:'Wage change: no real wage decrease for at least 80 percent of completers, comparing payroll at entry and at 12 months.' },
+      { kind:'indicator', t:'Reach into exposed groups: the share of places going to women, young entry-level workers and NCR-based roles, reported each cohort beside each group\u2019s ILO exposure rate.' },
+      { kind:'baseline', t:'Worker-reported outcome: a short survey at completion and at six months that sets a first baseline rather than a pass mark.' },
+      { kind:'limitation', t:'ILO exposure rates are a reference point, not demand for places, and a first cohort would reach only a small fraction of exposed workers.' },
+    ] },
   { label:'Feasibility', verdict:'Moderate, and better than I first judged',
-    body:'RA 12063 removes the eligibility obstacle I previously treated as the main barrier, because employed workers are already eligible for enterprise-based training and the employer deduction is already law. What remains missing is an income-support rule for mid-career trainees and a matching function for displaced workers.' },
+    body:'RA 12063 removes the eligibility obstacle I previously treated as the main barrier, because employed workers are already eligible for enterprise-based training and the employer deduction is already law. What remains missing is an income-support rule for mid-career trainees and a matching function for displaced workers.',
+    assess:[
+      { kind:'indicator', t:'Employer participation: 30 participating firms in a first cohort, within the first 12 months. This tests the assumption the model rests on, that employers will hire before training is complete.' },
+      { kind:'qualitative', t:'Whether an income-support rule for mid-career trainees and a matching function for displaced workers are put in place. These are conditions to check, not measured indicators.' },
+      { kind:'limitation', t:'The employer count says nothing about the quality of the roles offered.' },
+    ] },
   { label:'Effectiveness', verdict:'Not yet shown here',
-    body:'The wage and retention results are Singapore results. The Philippine version would have to earn its own numbers, which is what the SMART measures are for.' },
+    body:'The wage and retention results are Singapore results. The Philippine version would have to earn its own numbers, which is what the SMART measures are for.',
+    assess:[
+      { kind:'indicator', t:'Conversion completion: 75 percent of a first cohort finishing the full training and placement cycle within 12 months of cohort start.' },
+      { kind:'indicator', t:'Placement retention: 70 percent still employed in the converted role six months after completion, from employer reports cross-checked against contribution records where that can be arranged.' },
+      { kind:'indicator', t:'Wage change, the outcome Singapore also measured, and so the fairest test of whether the model transfers.' },
+      { kind:'limitation', t:'Completion is not employment, employer reports can be optimistic, and no Philippine baseline exists, so a first cohort would set it.' },
+    ] },
 ];
+
+/**
+ * The negative changes under Impact, which the class workbook's Evaluating Success
+ * Impact criterion asks for alongside the positive ones. Kept apart from
+ * PROPOSAL_CRITERIA, whose rows the v4 video shows, and built only from the SMART
+ * indicators in section H and the risks in section J: no new indicator, target or
+ * figure. `watch` is the indicator that would show the change; where there is none,
+ * the entry says so.
+ */
+export const IMPACT_NEGATIVES: { lead: string; items: { risk: string; watch?: string; how: string; refs?: RefKey[] }[] } = {
+  lead: 'The class Impact criterion asks for negative changes as well as positive ones. None has been observed, because the track has not run. These are prospective risks to monitor, not findings, and none adds an indicator or a target.',
+  items: [
+    { risk: 'Workers leave before finishing the cycle', watch: 'm1',
+      how: 'The share who do not complete would show in conversion completion.' },
+    { risk: 'Some completers earn less in the converted role', watch: 'm3',
+      how: 'The target allows up to one in five completers a real decrease, and the same payroll comparison would show how many there are.' },
+    { risk: 'Places go unevenly across the most exposed groups', watch: 'm5',
+      how: 'A group whose share of places is low relative to its exposure would be flagged for targeted recruitment in the next cohort.' },
+    { risk: 'Mid-career workers cannot afford to train without pay',
+      how: 'No indicator would show who stays out for this reason. RA 12063 covers training, not wages during conversion, and section J lists the missing income-support rule as a policy risk.', refs: ['ra12063'] },
+    { risk: 'Exposed workers the track never reaches',
+      how: 'Every indicator counts only workers who enter. A first cohort in IT-BPM would reach a small fraction of exposed workers, and wage change says nothing about those who never entered.' },
+  ],
+};
 
 /* ------------------------------------------------------------------- risks */
 export const RISKS = [
@@ -743,7 +852,7 @@ export const RISKS = [
 export const CONCLUSION: Sentence[][] = [
   [
     { t:'Workplace automation is changing Filipino jobs more than it is removing them, but the change is not landing evenly', refs:['huynh2026'] },
-    { t:'More than a quarter of Philippine employment sits in occupations exposed to generative AI, the highest share in ASEAN, while only 3.6 percent falls into the highest displacement risk group', refs:['huynh2026'] },
+    { t:'More than a quarter of Philippine employment sits in occupations exposed to generative AI, the highest share among ASEAN countries with recent comparable data, while only 3.6 percent falls into the highest displacement risk group', refs:['huynh2026'] },
   ],
   [
     { t:'Of the five solutions I evaluated against sustainability, impact, feasibility and effectiveness, place-and-train career conversion ranks first' },
@@ -921,8 +1030,17 @@ export const SECTIONS: SectionDef[] = [
   { id:'proposal',     letter:'F', label:'Philippine career conversion proposal' },
   { id:'journey',      letter:'G', label:'A worker journey' },
   { id:'smart',        letter:'H', label:'SMART success dashboard' },
-  { id:'criteria',     letter:'I', label:'Class criteria assessment' },
+  { id:'criteria',     letter:'I', label:'Evaluating success' },
   { id:'risks',        letter:'J', label:'Risks and limitations' },
   { id:'conclusion',   letter:'K', label:'Conclusion' },
   { id:'references',   letter:'L', label:'References' },
+];
+
+/** The twelve sections in five parts, for the navigation. Section letters and anchors are unchanged. */
+export const SECTION_PARTS: { label: string; letters: string }[] = [
+  { label:'The issue',  letters:'ABC' },
+  { label:'Solutions',  letters:'DE' },
+  { label:'Proposal',   letters:'FG' },
+  { label:'Evaluation', letters:'HIJ' },
+  { label:'Conclusion and references', letters:'KL' },
 ];

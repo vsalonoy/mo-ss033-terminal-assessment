@@ -1,29 +1,17 @@
 import { Fragment, useCallback, useEffect, useId, useRef, useState, type MouseEvent, type ReactNode } from 'react';
-import { motion, useInView, useMotionValue, animate } from 'motion/react';
+import { useInView, useMotionValue, animate } from 'motion/react';
 import { usePrefersReducedMotion, type CiteReturn } from '../hooks/useSiteState';
 import { refMap, type RefKey, type Sentence } from '../data/research';
 
 /**
- * Scroll-triggered entrance. Collapses to a plain element when motion is reduced.
- * `as` keeps list semantics valid: inside an ol or ul it must render an li,
- * because a wrapper div between the list and its items breaks the list for screen readers.
+ * A block that used to fade in on scroll. The editorial design keeps the page still:
+ * content is simply there, which also suits reduced motion, print and screenshots.
+ * `as` keeps list semantics valid: inside an ol or ul it must render an li.
  */
-export function Reveal({ children, delay = 0, y = 18, className = '', as = 'div' }:
+export function Reveal({ children, className = '', as = 'div' }:
   { children: ReactNode; delay?: number; y?: number; className?: string; as?: 'div' | 'li' }) {
-  const reduced = usePrefersReducedMotion();
-  const ref = useRef<HTMLDivElement & HTMLLIElement>(null);
-  const inView = useInView(ref, { once: true, margin: '-12% 0px -12% 0px' });
   const Plain = as;
-  const M = as === 'li' ? motion.li : motion.div;
-  if (reduced) return <Plain className={className}>{children}</Plain>;
-  return (
-    <M
-      ref={ref} className={className}
-      initial={{ opacity: 0, y }}
-      animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y }}
-      transition={{ duration: 0.62, delay, ease: [0.22, 0.61, 0.36, 1] }}
-    >{children}</M>
-  );
+  return <Plain className={className}>{children}</Plain>;
 }
 
 /* Counts a figure up once on screen. Shows the final value immediately when motion is reduced. */
@@ -84,9 +72,11 @@ export function Cite({ keys }: { keys: RefKey[] }) {
     const back: CiteReturn = { id: e.currentTarget.id, y: Math.round(window.scrollY) };
     history.replaceState({ ...(history.state ?? {}), citeReturn: back }, '');
     history.pushState({ refFrom: back.id }, '', `#ref-${k}`);
+    /* Announced first: section L clears its source-type filter on it, so the entry
+       is showing before it is scrolled to. */
+    window.dispatchEvent(new CustomEvent<RefFollowed>(REF_FOLLOWED, { detail: { key: k } }));
     target.scrollIntoView({ behavior: reduced ? 'instant' : 'smooth', block: 'start' });
     target.focus({ preventScroll: true });
-    window.dispatchEvent(new CustomEvent<RefFollowed>(REF_FOLLOWED, { detail: { key: k } }));
   }, [reduced]);
 
   /* Group by displayed name, then order the groups alphabetically. */
@@ -99,7 +89,7 @@ export function Cite({ keys }: { keys: RefKey[] }) {
       id={`cite-${base}-${k}`}
       href={`#ref-${k}`}
       onClick={e => follow(e, k)}
-      className="hover:text-cyan-300 underline decoration-dotted decoration-line/60 underline-offset-2"
+      className="underline decoration-cyan-300/35 underline-offset-2 hover:decoration-cyan-300"
     >{label}</a>
   );
 
@@ -143,22 +133,20 @@ export function Eyebrow({ children }: { children: ReactNode }) {
   return <div className="eyebrow">{children}</div>;
 }
 
-/* Section shell. id is the scroll target for the section menu and rail. */
+/* Section shell. id is the scroll target for the contents menu and every citation. */
 export function Section({ id, letter, label, title, lede, children }:
   { id: string; letter: string; label: string; title: string; lede?: string; children: ReactNode }) {
   return (
     /* tabIndex -1 makes the section a programmatic focus target, so choosing it
-       from the responsive Sections menu lands keyboard focus on the destination
-       rather than leaving it on a control that has just unmounted. */
+       from the Contents menu lands keyboard focus on the destination rather than
+       leaving it on a control that has just unmounted. */
     <section id={id} aria-label={`${letter}. ${label}`} tabIndex={-1}
-      className="scroll-mt-24 py-24 sm:py-28 focus:outline-none focus-visible:outline-2 focus-visible:outline-cyan-400">
+      className="scroll-mt-20 py-12 sm:py-16 focus:outline-none focus-visible:outline-2 focus-visible:outline-cyan-400">
       <div className="wrap">
-        <Reveal>
-          <Eyebrow>{letter} &nbsp;/&nbsp; {label}</Eyebrow>
-          <h2 className="t-sec mt-3">{title}</h2>
-          {lede && <p className="t-lede mt-5">{lede}</p>}
-        </Reveal>
-        <div className="mt-12">{children}</div>
+        <Eyebrow>Section {letter} · {label}</Eyebrow>
+        <h2 className="t-sec mt-3 max-w-[30ch]">{title}</h2>
+        {lede && <p className="t-lede mt-5">{lede}</p>}
+        <div className="mt-10">{children}</div>
       </div>
     </section>
   );
@@ -167,10 +155,10 @@ export function Section({ id, letter, label, title, lede, children }:
 export function Chip({ children, tone = 'neutral' }:
   { children: ReactNode; tone?: 'neutral' | 'cyan' | 'amber' | 'rose' }) {
   const tones = {
-    neutral: 'border-line text-mute',
-    cyan: 'border-cyan-500/40 text-cyan-300 bg-cyan-500/[0.07]',
-    amber: 'border-amber/40 text-amber bg-amber/[0.07]',
-    rose: 'border-rose/40 text-rose bg-rose/[0.07]',
+    neutral: 'border-line text-sand/80 bg-ink-700',
+    cyan: 'border-cyan-500/40 text-cyan-200 bg-cyan-500/[0.08]',
+    amber: 'border-amber/45 text-amber bg-amber/[0.08]',
+    rose: 'border-rose/45 text-rose bg-rose/[0.08]',
   };
   return <span className={`chip ${tones[tone]}`}>{children}</span>;
 }
@@ -190,25 +178,25 @@ export function Disclosure({ summary, hint, children, defaultOpen = false }:
   const [open, setOpen] = useState(defaultOpen);
   const panelId = useId();
   return (
-    <div className={`mt-6 card card-toggle ${open ? 'border-cyan-500/30' : ''}`}>
+    <div className={`mt-6 card card-toggle ${open ? 'border-cyan-500/50' : ''}`}>
       <button
         type="button"
         onClick={() => setOpen(o => !o)}
         aria-expanded={open}
         aria-controls={panelId}
-        className="w-full text-left px-6 py-5 flex items-center gap-4"
+        className="flex min-h-[44px] w-full items-center gap-4 px-5 py-4 text-left sm:px-6"
       >
         <span aria-hidden
-          className={`shrink-0 text-lg leading-none text-cyan-300 transition-transform ${open ? 'rotate-45' : ''}`}>+</span>
+          className={`grid h-7 w-7 shrink-0 place-items-center rounded-full border border-line text-[1rem] leading-none text-cyan-300 transition-transform ${open ? 'rotate-45' : ''}`}>+</span>
         <span className="min-w-0 flex-1">
-          <span className="block font-display text-[0.98rem] font-bold leading-snug text-sand">{summary}</span>
-          {hint && <span className="mt-0.5 block text-[0.8rem] leading-snug text-mute">{hint}</span>}
+          <span className="block text-[1rem] font-semibold leading-snug text-sand">{summary}</span>
+          {hint && <span className="mt-0.5 block text-[0.9rem] leading-snug text-mute">{hint}</span>}
         </span>
-        <span className="shrink-0 mlabel text-mute">
+        <span className="shrink-0 text-[0.85rem] font-semibold text-cyan-300">
           {open ? 'Hide' : 'Show'}
         </span>
       </button>
-      <div id={panelId} hidden={!open} className="border-t border-line/60 px-6 pb-6 pt-2">
+      <div id={panelId} hidden={!open} data-print-open className="border-t border-line px-5 pb-6 pt-3 sm:px-6">
         {children}
       </div>
     </div>
@@ -218,10 +206,10 @@ export function Disclosure({ summary, hint, children, defaultOpen = false }:
 /* Used wherever the site must say plainly that something is proposed, not measured. */
 export function Caveat({ children, tone = 'amber' }: { children: ReactNode; tone?: 'amber' | 'rose' }) {
   const c = tone === 'rose'
-    ? 'border-l-rose/60 bg-rose/[0.05]'
-    : 'border-l-amber/60 bg-amber/[0.05]';
+    ? 'border-l-rose bg-rose/[0.06]'
+    : 'border-l-amber bg-amber/[0.07]';
   return (
-    <div className={`mt-8 border-l-2 ${c} px-5 py-4 text-[0.92rem] leading-relaxed text-sand/85 prose-r rounded-r`}>
+    <div className={`mt-8 max-w-reading rounded-r-lg border-l-[3px] ${c} px-5 py-4 text-[0.98rem] leading-relaxed text-sand/90`}>
       {children}
     </div>
   );

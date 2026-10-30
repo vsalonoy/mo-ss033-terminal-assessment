@@ -3,8 +3,9 @@
  *
  * Every image comes from Wikimedia Commons, where the licence, creator and source
  * are recorded on the file page linked in `source`. They were verified on
- * 22 October 2026. Each was cropped, resized and converted to WebP for the web;
- * for the two CC BY-SA images that adaptation is shared under the same licence.
+ * 22 October 2026, and the two added for the opening stage (eastwood, peso) on
+ * 28 October 2026. Each was cropped, resized and converted to WebP for the web;
+ * for the CC BY-SA images that adaptation is shared under the same licence.
  *
  * All photographs are illustrative. None documents a finding of this research,
  * and none shows a participant, Maria, or any person named on the site.
@@ -17,6 +18,10 @@ import tesdaLg from '../assets/media/f-tesda-vr-welding-1200.webp';
 import tesdaSm from '../assets/media/f-tesda-vr-welding-680.webp';
 import labLg from '../assets/media/k-computer-lab-1920.webp';
 import labSm from '../assets/media/k-computer-lab-960.webp';
+import eastLg from '../assets/media/s-eastwood-1400.webp';
+import eastSm from '../assets/media/s-eastwood-760.webp';
+import pesoLg from '../assets/media/s-bulacan-peso-1400.webp';
+import pesoSm from '../assets/media/s-bulacan-peso-760.webp';
 
 export interface Media {
   key: string;
@@ -67,4 +72,29 @@ export const MEDIA = {
     source: 'https://commons.wikimedia.org/wiki/File:De_La_Salle_University_%E2%80%93_Dasmari%C3%B1as_(DLSU%E2%80%93D)_Information_and_Communications_Technology_Center_(ICTC)_laboratory_room_203_(ICT203)_%E2%80%94_normal_view.jpg',
     adapted: 'Cropped and resized.',
   },
+  eastwood: {
+    key: 'eastwood', src: eastLg, srcSet: `${eastSm} 760w, ${eastLg} 1400w`, width: 1400, height: 788,
+    alt: 'High-rise office and residential towers of Eastwood City, Quezon City, seen across low-rise neighbourhoods from Ortigas Center.',
+    caption: 'Eastwood City, Quezon City, a Metro Manila business district where IT-BPM firms operate.',
+    title: 'Eastwood City from Ortigas Center, Oct 2025',
+    creator: 'Ralff Nestor Nacor', license: 'CC BY-SA 4.0', licenseUrl: 'https://creativecommons.org/licenses/by-sa/4.0/',
+    source: 'https://commons.wikimedia.org/wiki/File:Eastwood_City_from_Ortigas_Center,_Oct_2025.jpg',
+    adapted: 'Cropped to 16:9 and resized; adaptation shared under CC BY-SA 4.0.',
+  },
+  peso: {
+    key: 'peso', src: pesoLg, srcSet: `${pesoSm} 760w, ${pesoLg} 1400w`, width: 1400, height: 788,
+    alt: 'The front of the Provincial Public Employment Service Office building in Malolos, Bulacan, with its name in blue letters on a green facade.',
+    caption: 'The Provincial Public Employment Service Office in Malolos, Bulacan. PESOs are the local offices the proposal would use for intake.',
+    title: 'Bulacan Public Employment Service Office 01',
+    creator: 'FBenjr123', license: 'CC BY-SA 4.0', licenseUrl: 'https://creativecommons.org/licenses/by-sa/4.0/',
+    source: 'https://commons.wikimedia.org/wiki/File:Bulacan_Public_Employment_Service_Office_01.jpg',
+    adapted: 'Cropped to 16:9 from the top of the frame, which leaves out a banner naming local officials at street level, and resized; adaptation shared under CC BY-SA 4.0.',
+  },
 } satisfies Record<string, Media>;
+
+/**
+ * The opening-stage photographs, in narrative order: where the work is, what is
+ * changing, where support comes from. Shortlist D-5, after the final checks of
+ * 28 October 2026 (see docs/STAGE-B-REPORT.md for what was dropped and why).
+ */
+export const CAROUSEL: Media[] = [MEDIA.hero, MEDIA.eastwood, MEDIA.itPark, MEDIA.tesda, MEDIA.peso, MEDIA.lab];

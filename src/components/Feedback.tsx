@@ -28,7 +28,7 @@ const SECTIONS = [
   'Section F: Proposed Solution',
   'Section G: Worker Journey',
   'Section H: SMART Indicators',
-  'Section I: Evaluation Criteria',
+  'Section I: Evaluating Success',
   'Section J: Risks',
   'Section K: Conclusion',
   'Section L: References',

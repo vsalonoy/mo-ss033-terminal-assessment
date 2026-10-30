@@ -64,7 +64,7 @@ describe('research data', () => {
 });
 
 describe('rendered site', () => {
-  it('renders the twelve sections in order, then the feedback form after section L', () => {
+  it('renders the twelve sections in order, then the reviewer panel after section L', () => {
     render(<App />);
     const sections = SECTIONS.map(s => document.getElementById(s.id));
     sections.forEach((el, i) => {
@@ -79,6 +79,50 @@ describe('rendered site', () => {
     /* It is not a research section: outside <main>, and not in the section menu or rail. */
     expect(document.getElementById('main')!.contains(feedback)).toBe(false);
     expect(document.querySelector('a[href="#mentor-feedback"]')).toBeNull();
+  });
+
+  /* Regression guard for the 320px overflow in section G (QA-2026-10-24-01). The six
+     dots and two arrows need about 295px on one line, more than the panel has on the
+     narrowest phones, and a row that cannot wrap widened the whole page by 53px.
+     jsdom does no layout, so this checks the row can wrap; the widths themselves are
+     checked in a browser. */
+  it('lets the section G journey controls wrap on narrow screens', () => {
+    render(<App />);
+    const row = document.querySelector('#journey [role="group"][aria-label="Journey progress"]');
+    expect(row).not.toBeNull();
+    expect(row).toHaveClass('flex-wrap');
+  });
+
+  /* The four criteria names are used at two stages. Section D compares the
+     alternatives (Determining Solution); section I evaluates the selected proposal
+     (Evaluating Success). These guard the wording that keeps the two apart. */
+  it('labels section D as Determining Solution, not Evaluating Success', () => {
+    render(<App />);
+    const d = document.getElementById('solutions')!;
+    expect(d.textContent).toMatch(/class Determining Solution criteria/);
+    expect(d.textContent).not.toMatch(/criteria for evaluating success/i);
+    expect(d.textContent).not.toMatch(/needs confirming/i);
+  });
+
+  it('evaluates success in section I on exactly the four criteria, each with how it would be assessed', () => {
+    render(<App />);
+    const i = document.getElementById('criteria')!;
+    expect([...i.querySelectorAll('h3')].map(h => h.textContent))
+      .toEqual(['Sustainability', 'Impact', 'Feasibility', 'Effectiveness']);
+    expect([...i.querySelectorAll('h4')].filter(h => h.textContent === 'How success would be assessed')).toHaveLength(4);
+    expect(i.textContent).not.toMatch(/needs confirming|acceptability/i);
+    /* Sustainability has no SMART indicator, and says so rather than inventing one. */
+    expect(research.PROPOSAL_CRITERIA[0].assess.some(a => a.kind === 'gap')).toBe(true);
+    expect(research.PROPOSAL_CRITERIA[0].assess.some(a => a.kind === 'indicator')).toBe(false);
+  });
+
+  /* The source ranks the Philippines highest only among ASEAN countries with recent
+     comparable data, so the comparison is never stated without that qualifier. */
+  it('qualifies every ASEAN exposure comparison', () => {
+    render(<App />);
+    const text = document.body.textContent!;
+    expect(text).not.toMatch(/highest (share|rate) in ASEAN/i);
+    expect(text).toMatch(/highest share among ASEAN countries with recent comparable data/);
   });
 
   it('renders every reference entry in section L', () => {
